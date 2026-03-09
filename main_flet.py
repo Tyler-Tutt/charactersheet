@@ -74,6 +74,7 @@ def main(page: ft.Page):
         """
         # 1. Update Header Fields
         view_controls.header.update_header_data(model_data)
+        view_controls.achpspeed.update_stats_data(model_data)
 
         # 2. Update Ability Scores and Modifiers
         for card in view_controls.ability_score_containers:
@@ -92,7 +93,6 @@ def main(page: ft.Page):
         # 3. TODO: Update other UI elements as you add them
         # (e.g., skill proficiencies, HP, etc.)
         print(f"View updated from model for {model_data.charactername}")
-
 
     def open_load_dialog(e):
         """Opens a ft.Alertdialog to load a character from the database."""
@@ -120,7 +120,7 @@ def main(page: ft.Page):
         )
         page.open(dialog)
 
-    # --- 4. Page Setup and Final Layout ---
+    # Menu
     page.appbar = ft.AppBar(
         title=ft.Text("Flet Character Sheet"),
         actions=[

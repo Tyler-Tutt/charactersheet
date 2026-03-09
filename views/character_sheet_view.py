@@ -2,6 +2,7 @@ import flet as ft
 from models.character_model import CharacterModel
 from views.ability_score_container import AbilityScoreContainer
 from views.character_header_container import CharacterHeaderContainer
+from views.acinitiativespeed import AcInitiativeSpeed
 
 #TODO Layout Ability Score, AC/HP/Speed, and Features Column
 
@@ -26,7 +27,8 @@ class CharacterSheetView(ft.Container):
         Instantiate UI components
         '''
         self.header = CharacterHeaderContainer(self.model, self.on_header_change)
-        self.second_row_container = self._create_second_row_container()
+        self.achpspeed = AcInitiativeSpeed(self.model, self.on_header_change)
+        self.second_row_container = self._create_row_2()
         
         return ft.Column(
             controls=[
@@ -36,7 +38,7 @@ class CharacterSheetView(ft.Container):
             ]
         )
 
-    def _create_second_row_container(self):
+    def _create_row_2(self):
         "Builds and returns a container with a row which has 3 Columns"
         # --- Populate the self.ability_cards list ---
         self.ability_score_containers = self._create_ability_score_containers()
@@ -66,7 +68,7 @@ class CharacterSheetView(ft.Container):
                         bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_200,
                         content=ft.Column(
                             controls=[
-                                ft.Text("AC/HP/Speed")
+                                self.achpspeed
                             ]
                         )
                     ),
