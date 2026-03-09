@@ -6,7 +6,7 @@ class CharacterHeaderContainer(ft.Container):
         # Initialize the parent Container
         super().__init__(
             padding=10,
-            bgcolor=ft.Colors.RED_200,
+            bgcolor=ft.Colors.CYAN_700,
             border=ft.border.all(2, ft.Colors.OUTLINE),
             border_radius=8
         )
