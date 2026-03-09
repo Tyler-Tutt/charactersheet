@@ -2,7 +2,7 @@ import flet as ft
 from models.character_model import CharacterModel
 from views.ability_score_container import AbilityScoreContainer
 from views.character_header_container import CharacterHeaderContainer
-from views.acinitiativespeed import AcInitiativeSpeed
+from views.ac_initiative_speed import AcInitiativeSpeed
 
 #TODO Layout Ability Score, AC/HP/Speed, and Features Column
 
@@ -46,42 +46,32 @@ class CharacterSheetView(ft.Container):
             bgcolor=ft.Colors.LIGHT_BLUE,
             border=ft.border.all(2),
             padding=5,
-            content=ft.Row(
+            content=ft.ResponsiveRow(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
 
                     # --- Ability Score Column ---
-                    ft.Container(
-                        expand=1,
-                        padding=10,
-                        bgcolor=ft.Colors.GREY,
-                        content=ft.Column(
-                            controls=[
-                                *self.ability_score_containers  # Unpack the list of containers
-                            ]
-                        )
+                    ft.Column(
+                        col={"sm": 12, "md": 4},
+                        controls=[
+                            *self.ability_score_containers  # Unpack the list of containers
+                        ]
                     ),
 
                     # --- AC/HP/Speed Column ---
-                    ft.Container(
-                        expand=1,
-                        bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_200,
-                        content=ft.Column(
-                            controls=[
-                                self.achpspeed
-                            ]
-                        )
+                    ft.Column(
+                        col={"sm": 12, "md": 4},
+                        controls=[
+                            self.achpspeed
+                        ]
                     ),
 
                     # --- Features & Traits Column ---
-                    ft.Container(
-                        expand=1,
-                        bgcolor=ft.Colors.GREY,
-                        content=ft.Column(
-                            controls=[
-                                ft.Text("Features & Traits")
-                            ]
-                        )
+                    ft.Column(
+                        col={"sm": 12, "md": 4},
+                        controls=[
+                            ft.Text("Features & Traits")
+                        ]
                     )
                 ]
             )

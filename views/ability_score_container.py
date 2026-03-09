@@ -25,25 +25,31 @@ class AbilityScoreContainer(ft.Container):
         self.skills_controls = []
         for skill_name, skill_info in skills_data.items():
             self.skills_controls.append(
-                ft.Row(
+                ft.ResponsiveRow(
                     controls=[
                         # Note: You'll eventually want to add an on_change handler here for the checkbox too!
-                        ft.Checkbox(value=skill_info["proficient"]),
-                        ft.TextField(width=50),
-                        ft.Text(skill_name, selectable=True)
+                        ft.Checkbox(value=skill_info["proficient"], col={"sm": 2, "md": 2}),
+                        ft.TextField(width=50, col={"sm": 3, "md": 3}),
+                        ft.Text(skill_name, selectable=True, col={"sm": 7, "md": 7})
                     ]
                 )
             )
             
         # --- Layout ---
-        self.content = ft.Row(
+        self.content = ft.ResponsiveRow(
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
+                # Ability Name - Modifier Score - Ability Score
                 ft.Column(
+                    col={"sm": 12, "md": 4},
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[self.ability_name_text, self.modifier_text, self.score_field]
                 ),
-                ft.Column(controls=self.skills_controls)
+                # Skills of Ability
+                ft.Column(
+                    col={"sm": 12, "md": 8},
+                    controls=self.skills_controls
+                ),
             ]
         )
 

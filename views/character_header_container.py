@@ -16,55 +16,45 @@ class CharacterHeaderContainer(ft.Container):
         # --- 1. Define the UI Controls ---
         self.charactername_field = ft.TextField(label="Character Name", value=model.charactername, data="charactername", on_change=self.on_header_change)
         self.class_field = ft.TextField(label="Class", value=model.characterclass, data="characterclass", on_change=self.on_header_change)
-        self.level_field = ft.TextField(label="Level", value=str(model.level), data="level", on_change=self.on_header_change)
-        self.background_field = ft.TextField(label="Background", value=model.background, data="background", on_change=self.on_header_change)
-        self.player_name_field = ft.TextField(label="Player Name", value=model.player_name, data="player_name", on_change=self.on_header_change)
-        self.race_field = ft.TextField(label="Race", value=model.race, data="race", on_change=self.on_header_change)
-        self.alignment_field = ft.TextField(label="Alignment", value=model.alignment, data="alignment", on_change=self.on_header_change)
-        self.experience_points_field = ft.TextField(label="Experience Points", value=str(model.experience_points), data="experience_points", on_change=self.on_header_change)
+        self.level_field = ft.TextField(label="Level", value=str(model.level), data="level", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.background_field = ft.TextField(label="Background", value=model.background, data="background", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.player_name_field = ft.TextField(label="Player Name", value=model.player_name, data="player_name", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.race_field = ft.TextField(label="Race", value=model.race, data="race", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.alignment_field = ft.TextField(label="Alignment", value=model.alignment, data="alignment", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.experience_points_field = ft.TextField(label="Experience Points", value=str(model.experience_points), data="experience_points", on_change=self.on_header_change, col={"sm": 12, "md": 4})
 
         # --- 2. Build the Layout ---
-        self.content = ft.Row(
+        self.content = ft.ResponsiveRow(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 # --- Name & Class Container ---
-                ft.Container(
-                    expand=1,
-                    bgcolor=ft.Colors.AMBER_900,
-                    padding=5,
-                    border_radius=5,
-                    content=ft.Column(
-                        controls=[
-                            self.charactername_field,
-                            self.class_field,
-                        ]
-                    ),
+                ft.Column(
+                    col={"sm": 12, "md": 4},
+                    controls=[
+                        self.charactername_field,
+                        self.class_field,
+                    ],
                 ),
                 
                 # --- Background Header Column ---
-                ft.Container(
-                    expand=2,
-                    bgcolor=ft.Colors.PURPLE,
-                    padding=5,
-                    border_radius=5,
-                    content=ft.Column(
-                        controls=[
-                            ft.Row(
-                                controls=[
-                                    self.level_field,
-                                    self.background_field,
-                                    self.player_name_field,
-                                ]
-                            ),
-                            ft.Row(
-                                controls=[
-                                    self.race_field,
-                                    self.alignment_field,
-                                    self.experience_points_field,
-                                ]
-                            )
-                        ]
-                    ),
+                ft.Column(
+                    col={"sm": 12, "md": 8},
+                    controls=[
+                        ft.ResponsiveRow(
+                            controls=[
+                                self.level_field,
+                                self.background_field,
+                                self.player_name_field,
+                            ]
+                        ),
+                        ft.ResponsiveRow(
+                            controls=[
+                                self.race_field,
+                                self.alignment_field,
+                                self.experience_points_field,
+                            ]
+                        )
+                    ]
                 )
             ]
         )

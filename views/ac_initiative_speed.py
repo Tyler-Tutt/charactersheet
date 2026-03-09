@@ -14,26 +14,16 @@ class AcInitiativeSpeed(ft.Container):
         self.on_header_change = on_change_handler
 
         # --- 1. Define the UI Controls ---
-        self.armor_class = ft.TextField(label="Armor Class", value=model.armor_class, data="armor_class", expand=True, on_change=self.on_header_change)
-        self.initiative = ft.TextField(label="Initiative", value=model.initiative, data="initiative", expand=True, on_change=self.on_header_change)
-        self.speed = ft.TextField(label="Speed", value=model.speed, data="speed", expand=True, on_change=self.on_header_change)
+        self.armor_class = ft.TextField(label="Armor Class", value=model.armor_class, data="armor_class", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.initiative = ft.TextField(label="Initiative", value=model.initiative, data="initiative", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.speed = ft.TextField(label="Speed", value=model.speed, data="speed", on_change=self.on_header_change, col={"sm": 12, "md": 4})
 
         # --- 2. Build the Layout ---
-        self.content = ft.Row(
+        self.content = ft.ResponsiveRow(
             controls=[
-                ft.Container(
-                    expand=1,
-                    bgcolor=ft.Colors.AMBER_900,
-                    padding=5,
-                    border_radius=5,
-                    content=ft.Row(
-                        controls=[
-                            self.armor_class,
-                            self.initiative,
-                            self.speed,
-                        ]
-                    ),
-                ),
+                self.armor_class,
+                self.initiative,
+                self.speed,
             ]
         )
 
