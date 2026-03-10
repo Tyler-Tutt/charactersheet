@@ -1,6 +1,6 @@
 import flet as ft
 
-class LoadCharacterDialog(ft.AlertDialog):
+class LoadCharacterModal(ft.AlertDialog):
     def __init__(self, character_list: list, on_load_confirm, on_cancel):
         # Initialize the parent AlertDialog
         super().__init__(

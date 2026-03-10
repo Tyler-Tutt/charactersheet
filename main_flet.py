@@ -1,18 +1,18 @@
 import flet as ft
-from controllers.character_controller import CharacterController
+from controllers.character_sheet_controller import CharacterSheetController
 import database
 
+# tells ft.App, "Take the function named main and use it as the blueprint for every new user session"
 def main(page: ft.Page):
     # --- Page Setup ---
-    page.title = "Flet Character Sheet"
+    page.title = "Flet Character Sheet pew pew"
     page.scroll = ft.ScrollMode.AUTO
     
     # --- Initialize Controller ---
     # The controller handles creating the model and the view
-    app_controller = CharacterController(page)
+    app_controller = CharacterSheetController(page)
 
     # --- Menu / AppBar ---
-    # Notice we pass the controller's methods to the buttons
     page.appbar = ft.AppBar(
         title=ft.Text("Flet Character Sheet"),
         actions=[
@@ -23,7 +23,7 @@ def main(page: ft.Page):
             ),
             ft.IconButton(
                 ft.Icons.FOLDER_OPEN, 
-                on_click=app_controller.open_load_dialog, 
+                on_click=app_controller.open_load_modal, 
                 tooltip="Load Character"
             ),
         ]

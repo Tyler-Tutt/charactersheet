@@ -1,10 +1,10 @@
 import flet as ft
 from models.character_model import CharacterModel
 from views.character_sheet_view import CharacterSheetView
-from views.load_character_dialog import LoadCharacterDialog
+from views.load_character_modal import LoadCharacterModal
 import database
 
-class CharacterController:
+class CharacterSheetController:
     def __init__(self, page: ft.Page):
         self.page = page
         
@@ -78,24 +78,24 @@ class CharacterController:
                 )
         print(f"View updated from model for {self.model.charactername}")
 
-    def open_load_dialog(self, e):
-        """Handles opening the load dialog and managing its callbacks."""
+    def open_load_modal(self, e):
+        """Handles opening the load character modal and managing its callbacks."""
         character_list = database.get_character_list()
 
         def handle_load(char_to_load):
             if self.model.load_character(char_to_load):
                 self.update_view_from_model()
-                self.page.close(dialog) 
+                self.page.close(modal) 
                 self.page.open(ft.SnackBar(ft.Text(f"Loaded {char_to_load}!"))) 
             else:
                 self.page.open(ft.SnackBar(ft.Text(f"Failed to load {char_to_load}.")))
 
         def handle_cancel():
-            self.page.close(dialog)
+            self.page.close(modal)
 
-        dialog = LoadCharacterDialog(
+        modal = LoadCharacterModal(
             character_list=character_list,
             on_load_confirm=handle_load,
             on_cancel=handle_cancel
         )
-        self.page.open(dialog)
+        self.page.open(modal)
