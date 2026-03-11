@@ -2,6 +2,10 @@ import flet as ft
 from models.character_model import CharacterModel
 
 class AcInitiativeSpeed(ft.Container):
+    '''
+    ft.Container containing AC, Initiative, & Speed Fields.
+    Also containting the function to handle loading this data from the model when loading a character.
+    '''
     def __init__(self, model: CharacterModel, on_change_handler):
         # Initialize the parent Container
         super().__init__(
@@ -27,10 +31,10 @@ class AcInitiativeSpeed(ft.Container):
             ]
         )
 
-    def update_stats_data(self, model: CharacterModel):
+    def load_acinitiativespeed_data(self, model: CharacterModel):
         """Called by the main controller when loading a character."""
         self.armor_class.value = str(model.armor_class)
-        self.initiative.value = str(model.max_hp)
+        self.initiative.value = str(model.initiative)
         self.speed.value = str(model.speed)
         
         # Tell Flet to redraw ONLY this card

@@ -42,9 +42,33 @@ class CharacterSheetController:
         setattr(self.model, attr_name, new_value)
 
     def handle_score_change(self, ability_name: str, new_score: int):
-        """Updates the model when an ability score changes."""
-        self.model.ability_scores[ability_name]["score"] = new_score
-        print(f"Model Updated: {ability_name} is now {new_score}")
+        """Updates the model and triggers a chain reaction of UI updates."""
+        
+        # 1. Update the Model
+        # This ensures our "Source of Truth" is current before we touch the UI.
+        if ability_name in self.model.ability_scores:
+            self.model.ability_scores[ability_name]["score"] = new_score
+            print(f"Model Updated: {ability_name} is now {new_score}")
+
+        # 2. Senior Tip: Trigger 'Derived' updates
+        # In D&D, stats are interconnected. If Dexterity changes, components 
+        # showing Armor Class or Initiative need to be notified to refresh.
+        if ability_name == "Dexterity":
+            # This calls the update method on your specific AC/HP/Speed component.
+            self.view.achpspeed.update_stats_data(self.model)
+            
+        # 3. Inform the specific component to refresh
+        # Instead of refreshing the ENTIRE page, we find only the card that changed.
+        # This logic is adapted from your 'update_view_from_model' method.
+        for card in self.view.ability_score_containers:
+            if card.ability_name == ability_name:
+                ability_data = self.model.ability_scores[ability_name]
+                # Sync the individual card with the latest model data.
+                card.update_card_data(
+                    new_score=ability_data["score"],
+                    new_skills_data=ability_data["skills"]
+                )
+                break # Optimization: Stop searching once the correct card is found.
 
     def save_character(self, e):
         """Saves the current character data."""
@@ -66,7 +90,7 @@ class CharacterSheetController:
     def update_view_from_model(self):
         """Forces the view to update its UI components based on current model data."""
         self.view.header.update_header_data(self.model)
-        self.view.achpspeed.update_stats_data(self.model)
+        self.view.achpspeed.load_acinitiativespeed_data(self.model)
 
         for card in self.view.ability_score_containers:
             ability_name = card.ability_name 

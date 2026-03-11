@@ -2,6 +2,9 @@ import flet as ft
 from models.character_model import CharacterModel
 
 class CharacterHeaderContainer(ft.Container):
+    '''
+    
+    '''
     def __init__(self, model: CharacterModel, on_header_change):
         # Initialize the parent Container
         super().__init__(
