@@ -13,12 +13,10 @@ class AcInitiativeSpeed(ft.Container):
         self.on_header_change = on_change_handler
 
         # --- 1. Define the UI Controls ---
-        # Make derived stats read_only so the user cannot manually edit them
         self.armor_class = ft.TextField(label="Armor Class", value=str(model.armor_class), read_only=True, col={"sm": 12, "md": 4})
-        
         # Format initiative to show a + if positive
-        init_str = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
-        self.initiative = ft.TextField(label="Initiative", value=init_str, read_only=True, col={"sm": 12, "md": 4})
+        initiative_string = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
+        self.initiative = ft.TextField(label="Initiative", value=initiative_string, read_only=True, col={"sm": 12, "md": 4})
         
         # Speed can still be editable (or you can derive it from Race later!)
         self.speed = ft.TextField(label="Speed", value=str(model.speed), data="speed", on_change=self.on_header_change, col={"sm": 12, "md": 4})

@@ -2,7 +2,7 @@ import flet as ft
 from models.character_model import CharacterModel
 
 class AbilityScoreContainer(ft.Container):
-    def __init__(self, model: CharacterModel, ability_name: str, on_score_change, on_skill_prof_change):
+    def __init__(self, model: CharacterModel, ability_name: str, on_score_change, on_skill_proficiency_change):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.LIGHT_GREEN,
@@ -12,7 +12,7 @@ class AbilityScoreContainer(ft.Container):
         self.model = model
         self.ability_name = ability_name
         self.on_score_change = on_score_change  
-        self.on_skill_prof_change = on_skill_prof_change 
+        self.on_skill_proficiency_change = on_skill_proficiency_change 
         
         # We will store references to the skill modifier fields here so we can update them later
         self.skill_modifier_fields = {}
@@ -52,7 +52,7 @@ class AbilityScoreContainer(ft.Container):
             prof_checkbox = ft.Checkbox(
                 value=skill_info["proficient"], 
                 data={"ability": self.ability_name, "skill": skill_name},
-                on_change=self.on_skill_prof_change,
+                on_change=self.on_skill_proficiency_change,
                 col={"sm": 2, "md": 2}
             )
             
@@ -74,11 +74,16 @@ class AbilityScoreContainer(ft.Container):
                 ft.Column(
                     col={"sm": 12, "md": 4},
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    controls=[self.ability_name_text, self.modifier_text, self.score_field]
+                    controls=[
+                        self.ability_name_text,
+                        self.modifier_text,
+                        self.score_field
+                        ]
                 ),
                 ft.Column(
                     col={"sm": 12, "md": 8},
-                    controls=self.skills_controls
+                    controls=
+                        self.skills_controls
                 ),
             ]
         )

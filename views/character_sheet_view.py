@@ -5,13 +5,13 @@ from views.character_header_container import CharacterHeaderContainer
 from views.ac_initiative_speed import AcInitiativeSpeed
 
 class CharacterSheetView(ft.Container):
-    def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler, on_skill_prof_change_handler):
+    def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler, on_skill_proficiency_change_handler):
         super().__init__(expand=True)
         self.model = model
         
         self.on_score_change = on_score_change_handler
         self.on_header_change = on_header_change_handler
-        self.on_skill_prof_change = on_skill_prof_change_handler
+        self.on_skill_proficiency_change = on_skill_proficiency_change_handler
 
         self.ability_score_containers = []
         self.content = self.build_ui()
@@ -19,6 +19,13 @@ class CharacterSheetView(ft.Container):
     def build_ui(self):
         self.header = CharacterHeaderContainer(self.model, self.on_header_change)
         self.achpspeed = AcInitiativeSpeed(self.model, self.on_header_change)
+        self.proficiency_bonus_field = ft.TextField(
+            label="Proficiency Bonus",
+            value=self.model.format_modifier(self.model.proficiency_bonus),
+            read_only=True,
+            text_align=ft.TextAlign.CENTER,
+            # weight=ft.FontWeight.BOLD,
+        )
         self.second_row_container = self._create_row_2()
         
         return ft.Column(
@@ -40,15 +47,22 @@ class CharacterSheetView(ft.Container):
                 controls=[
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[*self.ability_score_containers]
+                        controls=[
+                            self.proficiency_bonus_field,
+                            *self.ability_score_containers
+                            ]
                     ),
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[self.achpspeed]
+                        controls=[
+                            self.achpspeed
+                            ]
                     ),
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[ft.Text("Features & Traits")]
+                        controls=[
+                            ft.Text("Features & Traits")
+                            ]
                     )
                 ]
             )
@@ -61,7 +75,12 @@ class CharacterSheetView(ft.Container):
                 model=self.model,
                 ability_name=ability_name,
                 on_score_change=self.on_score_change,
-                on_skill_prof_change=self.on_skill_prof_change
+                on_skill_proficiency_change=self.on_skill_proficiency_change
             )
             containers.append(card)
         return containers
+    
+    def update_proficiency_bonus(self):
+        """Pulls fresh Proficiency Bonus from the Model and updates the UI."""
+        self.proficiency_bonus_field.value = self.model.format_modifier(self.model.proficiency_bonus)
+        self.proficiency_bonus_field.update()

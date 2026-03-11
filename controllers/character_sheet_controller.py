@@ -13,7 +13,7 @@ class CharacterSheetController:
             model=self.model, 
             on_score_change_handler=self.handle_score_change, 
             on_header_change_handler=self.handle_header_change,
-            on_skill_prof_change_handler=self.handle_skill_prof_change
+            on_skill_proficiency_change_handler=self.handle_skill_proficiency_change
         )
 
     def get_view(self):
@@ -38,12 +38,15 @@ class CharacterSheetController:
         setattr(self.model, attr_name, new_value)
 
         # SENIOR TIP: If level changes, Proficiency Bonus changes! 
-        # We must tell all Ability Cards to recalculate their skill modifiers.
         if attr_name == 'level':
+            # 🟢 1. Update the Proficiency Bonus field itself
+            self.view.update_proficiency_bonus()
+            
+            # 2. Tell all Ability Cards to recalculate their skill modifiers
             for card in self.view.ability_score_containers:
                 card.update_card_data()
 
-    def handle_skill_prof_change(self, e: ft.ControlEvent):
+    def handle_skill_proficiency_change(self, e: ft.ControlEvent):
         """Fired when a user clicks a skill proficiency checkbox."""
         # e.control.data contains our dict {"ability": "Dexterity", "skill": "Stealth"}
         ability_name = e.control.data["ability"]

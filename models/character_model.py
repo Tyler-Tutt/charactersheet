@@ -45,23 +45,8 @@ class CharacterModel():
 
     # --- DERIVED PROPERTIES ---
     @property
-    def initiative(self) -> int:
-        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
-        return (score - 10) // 2
-
-    @property
-    def armor_class(self) -> int:
-        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
-        dex_mod = (score - 10) // 2
-        return 10 + dex_mod
-
-    # --- HELPER METHODS ---
-    def format_modifier(self, mod: int) -> str:
-        """Helper to safely format a modifier with a + or -"""
-        return f"+{mod}" if mod >= 0 else str(mod)
-
-    def calc_proficiency_bonus(self) -> int:
-        """Calculates and returns Proficiency Bonus based on character level."""
+    def proficiency_bonus(self) -> int:
+        """ Proficiency Bonus derived based on character level."""
         level = self.level
         if 1 <= level <= 4:
             return 2
@@ -74,6 +59,28 @@ class CharacterModel():
         elif 17 <= level <= 20:
             return 6
         return 0
+    
+    @property
+    def initiative(self) -> int:
+        '''
+        0 + Dexteridy Modifier
+        '''
+        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
+        return (score - 10) // 2
+
+    @property
+    def armor_class(self) -> int:
+        '''
+        10 + Dexteridy Modifier
+        '''
+        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
+        dex_mod = (score - 10) // 2
+        return 10 + dex_mod
+
+    # --- HELPER METHODS ---
+    def format_modifier(self, mod: int) -> str:
+        """Helper to safely format a modifier with a + or -"""
+        return f"+{mod}" if mod >= 0 else str(mod)
 
     def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
         """Calculates the final skill modifier (Ability Mod + Prof Bonus if proficient)."""
@@ -83,7 +90,7 @@ class CharacterModel():
         is_proficient = self.ability_scores.get(ability_name, {}).get("skills", {}).get(skill_name, {}).get("proficient", False)
         
         if is_proficient:
-            return base_mod + self.calc_proficiency_bonus()
+            return base_mod + self.proficiency_bonus
         return base_mod
 
     # --- SAVE / LOAD ---
