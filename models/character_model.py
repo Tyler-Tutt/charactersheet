@@ -2,7 +2,6 @@ import database
 
 class CharacterModel():
     def __init__(self, character_to_load=None):
-        """Initializes data model with standard Python types."""
         # --- Character Attributes ---
         self.charactername = "Character Name"
         self.characterclass = "Character Class"
@@ -12,8 +11,6 @@ class CharacterModel():
         self.race = "Race"
         self.alignment = "Alignment"
         self.experience_points = 0
-        self.armor_class = 10
-        self.initiative = 0
         self.speed = 30
         self.max_hp = 10
         self.current_hp = 10
@@ -43,24 +40,32 @@ class CharacterModel():
                 }
             }
 
-        #TODO Default-Load the last-used character
         if character_to_load:
             self.load_character(character_to_load)
 
-    def calc_ability_modifier(self, ability_name):
-        """Calculates and returns the modifier string for a given ability."""
-        # Ensure ability_name is capitalized correctly
-        ability_name = ability_name.capitalize()
-        score = self.ability_scores.get(ability_name, {}).get("score", 10)
-        modifier = (score - 10) // 2
-        return f"+{modifier}" if modifier >= 0 else str(modifier)
+    # --- DERIVED PROPERTIES ---
+    @property
+    def initiative(self) -> int:
+        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
+        return (score - 10) // 2
 
-    def calc_proficiency_bonus(self):
+    @property
+    def armor_class(self) -> int:
+        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
+        dex_mod = (score - 10) // 2
+        return 10 + dex_mod
+
+    # --- HELPER METHODS ---
+    def format_modifier(self, mod: int) -> str:
+        """Helper to safely format a modifier with a + or -"""
+        return f"+{mod}" if mod >= 0 else str(mod)
+
+    def calc_proficiency_bonus(self) -> int:
         """Calculates and returns Proficiency Bonus based on character level."""
         level = self.level
-        if (1 <= level) and (level <= 4): # "Long form" syntax
+        if 1 <= level <= 4:
             return 2
-        elif 5 <= level <= 8: # Syntactic sugar
+        elif 5 <= level <= 8:
             return 3
         elif 9 <= level <= 12:
             return 4
@@ -69,15 +74,25 @@ class CharacterModel():
         elif 17 <= level <= 20:
             return 6
         return 0
-    
+
+    def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
+        """Calculates the final skill modifier (Ability Mod + Prof Bonus if proficient)."""
+        score = self.ability_scores.get(ability_name, {}).get("score", 10)
+        base_mod = (score - 10) // 2
+        
+        is_proficient = self.ability_scores.get(ability_name, {}).get("skills", {}).get(skill_name, {}).get("proficient", False)
+        
+        if is_proficient:
+            return base_mod + self.calc_proficiency_bonus()
+        return base_mod
+
+    # --- SAVE / LOAD ---
     def load_character(self, character_name):
-        """Fetches data from DB and populates the model's attributes."""
         data = database.load_character(character_name)
         if not data:
             print(f"Load Error: Could not find data for {character_name}.")
-            return False # Return a status
+            return False
 
-        # Directly assign attributes
         self.charactername = data.get('charactername', "Unknown")
         self.characterclass = data.get('characterclass', "Class")
         self.level = data.get('level', 1)
@@ -86,21 +101,17 @@ class CharacterModel():
         self.race = data.get('race', "Race")
         self.alignment = data.get('alignment', "Alignment")
         self.experience_points = data.get('experience_points', 0)
-        self.armor_class = data.get('armor_class', 10)
-        self.initiative = data.get('initiative', 0)
         self.speed = data.get('speed', 30)
         self.max_hp = data.get('max_hp', 10)
         self.current_hp = data.get('current_hp', 10)
         self.temp_hp = data.get('temp_hp', 0)
         
-        # Load nested ability data
         if 'abilities' in data:
             self.ability_scores = data['abilities']
         
         return True
     
     def convert_to_dictionary(self):
-        """Gathers all model data into a Python dictionary for saving."""
         return {
             'charactername': self.charactername,
             'characterclass': self.characterclass,
@@ -110,8 +121,6 @@ class CharacterModel():
             'race': self.race,
             'alignment': self.alignment,
             'experience_points': self.experience_points,
-            'armor_class': self.armor_class,
-            'initiative': self.initiative,
             'speed': self.speed,
             'max_hp': self.max_hp,
             'current_hp': self.current_hp,
@@ -120,10 +129,9 @@ class CharacterModel():
         }
 
     def save_character(self):
-        """Saves the character's data to the database."""
         if not self.charactername or self.charactername == "Character Name":
             print("Save Error: Please enter a character name before saving.")
-            return False # Return a status
+            return False
 
         character_data = self.convert_to_dictionary()
         database.save_character(self.charactername, character_data)

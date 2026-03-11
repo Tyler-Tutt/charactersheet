@@ -4,28 +4,19 @@ from views.ability_score_container import AbilityScoreContainer
 from views.character_header_container import CharacterHeaderContainer
 from views.ac_initiative_speed import AcInitiativeSpeed
 
-#TODO Layout Ability Score, AC/HP/Speed, and Features Column
-
 class CharacterSheetView(ft.Container):
-    # 1. Update __init__ to accept the handler functions
-    def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler):
+    def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler, on_skill_prof_change_handler):
         super().__init__(expand=True)
         self.model = model
         
-        # Save the handlers to the class instance so other methods can use them
         self.on_score_change = on_score_change_handler
         self.on_header_change = on_header_change_handler
+        self.on_skill_prof_change = on_skill_prof_change_handler
 
-        # Ability Containers (will be populated in _create_ability_score_containers)
         self.ability_score_containers = []
-        
-        # Build the UI
         self.content = self.build_ui()
 
     def build_ui(self):
-        '''
-        Instantiate UI components
-        '''
         self.header = CharacterHeaderContainer(self.model, self.on_header_change)
         self.achpspeed = AcInitiativeSpeed(self.model, self.on_header_change)
         self.second_row_container = self._create_row_2()
@@ -39,8 +30,6 @@ class CharacterSheetView(ft.Container):
         )
 
     def _create_row_2(self):
-        "Builds and returns a container with a row which has 3 Columns"
-        # --- Populate the self.ability_cards list ---
         self.ability_score_containers = self._create_ability_score_containers()
         return ft.Container(
             bgcolor=ft.Colors.LIGHT_BLUE,
@@ -49,46 +38,30 @@ class CharacterSheetView(ft.Container):
             content=ft.ResponsiveRow(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-
-                    # --- Ability Score Column ---
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[
-                            *self.ability_score_containers  # Unpack the list of containers
-                        ]
+                        controls=[*self.ability_score_containers]
                     ),
-
-                    # --- AC/HP/Speed Column ---
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[
-                            self.achpspeed
-                        ]
+                        controls=[self.achpspeed]
                     ),
-
-                    # --- Features & Traits Column ---
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[
-                            ft.Text("Features & Traits")
-                        ]
+                        controls=[ft.Text("Features & Traits")]
                     )
                 ]
             )
         )
 
     def _create_ability_score_containers(self):
-        """Builds the ft.Container for each ability score using the AbilityScoreContainer component."""
         containers = []
         for ability_name in self.model.abilities_list:
-            ability_data = self.model.ability_scores[ability_name]
-            
-            # Instantiate our clean new custom component
             card = AbilityScoreContainer(
+                model=self.model,
                 ability_name=ability_name,
-                initial_score=ability_data["score"],
-                skills_data=ability_data["skills"],
-                on_score_change=self.on_score_change # Pass the controller's function down
+                on_score_change=self.on_score_change,
+                on_skill_prof_change=self.on_skill_prof_change
             )
             containers.append(card)
         return containers
