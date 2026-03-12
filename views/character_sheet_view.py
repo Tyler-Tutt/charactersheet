@@ -8,8 +8,7 @@ class CharacterSheetView(ft.Container):
     def __init__(self, model: CharacterModel, controller):
         super().__init__(expand=True)
         self.model = model
-        self.controller = self.controller
-
+        self.controller = controller
         self.ability_score_containers = []
         self.content = self.build_ui()
 

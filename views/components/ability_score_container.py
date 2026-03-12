@@ -1,9 +1,11 @@
 import flet as ft
+from typing import TYPE_CHECKING
 from models.character_model import CharacterModel
-from controllers.character_sheet_controller import CharacterSheetController
+if TYPE_CHECKING:
+    from controllers.character_sheet_controller import CharacterSheetController
 
 class AbilityScoreContainer(ft.Container):
-    def __init__(self, model: CharacterModel, ability_name: str, controller: CharacterSheetController):
+    def __init__(self, model: CharacterModel, ability_name: str, controller: 'CharacterSheetController'):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.LIGHT_GREEN,

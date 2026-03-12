@@ -1,12 +1,15 @@
 import flet as ft
+from typing import TYPE_CHECKING
 from models.character_model import CharacterModel
-from controllers.character_sheet_controller import CharacterSheetController
+if TYPE_CHECKING:
+    from controllers.character_sheet_controller import CharacterSheetController
+
 
 class AcInitiativeSpeed(ft.Container):
     '''
     Contains Armor Class, Initiative, and Speed fields
     '''
-    def __init__(self, model: CharacterModel, controller: CharacterSheetController):
+    def __init__(self, model: CharacterModel, controller: 'CharacterSheetController'):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.RED_200,
