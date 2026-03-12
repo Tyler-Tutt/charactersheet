@@ -1,8 +1,9 @@
 import flet as ft
 from models.character_model import CharacterModel
+from controllers.character_sheet_controller import CharacterSheetController
 
 class AbilityScoreContainer(ft.Container):
-    def __init__(self, model: CharacterModel, ability_name: str, on_score_change, on_skill_proficiency_change):
+    def __init__(self, model: CharacterModel, ability_name: str, controller: CharacterSheetController):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.LIGHT_GREEN,
@@ -11,8 +12,7 @@ class AbilityScoreContainer(ft.Container):
         )
         self.model = model
         self.ability_name = ability_name
-        self.on_score_change = on_score_change  
-        self.on_skill_proficiency_change = on_skill_proficiency_change 
+        self.controller = controller
         
         # We will store references to the skill modifier fields here so we can update them later
         self.skill_modifier_fields = {}
@@ -52,7 +52,7 @@ class AbilityScoreContainer(ft.Container):
             prof_checkbox = ft.Checkbox(
                 value=skill_info["proficient"], 
                 data={"ability": self.ability_name, "skill": skill_name},
-                on_change=self.on_skill_proficiency_change,
+                on_change=self.controller.handle_skill_proficiency_change,
                 col={"sm": 2, "md": 2}
             )
             
@@ -101,8 +101,8 @@ class AbilityScoreContainer(ft.Container):
         self.modifier_text.value = self.model.format_modifier((new_score - 10) // 2)
         
         # 2. Tell the main controller the data changed
-        if self.on_score_change:
-            self.on_score_change(self.ability_name, new_score)
+        if self.controller:
+            self.controller.handle_ability_score_change(self.ability_name, new_score)
 
     def update_card_data(self):
         """Pulls fresh data from the model and updates the UI."""

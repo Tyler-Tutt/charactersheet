@@ -1,8 +1,12 @@
 import flet as ft
 from models.character_model import CharacterModel
+from controllers.character_sheet_controller import CharacterSheetController
 
 class AcInitiativeSpeed(ft.Container):
-    def __init__(self, model: CharacterModel, on_change_handler):
+    '''
+    Contains Armor Class, Initiative, and Speed fields
+    '''
+    def __init__(self, model: CharacterModel, controller: CharacterSheetController):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.RED_200,
@@ -10,7 +14,7 @@ class AcInitiativeSpeed(ft.Container):
             border_radius=8
         )
         
-        self.on_header_change = on_change_handler
+        self.controller = controller
 
         # --- 1. Define the UI Controls ---
         self.armor_class = ft.TextField(label="Armor Class", value=str(model.armor_class), read_only=True, col={"sm": 12, "md": 4})
@@ -19,7 +23,7 @@ class AcInitiativeSpeed(ft.Container):
         self.initiative = ft.TextField(label="Initiative", value=initiative_string, read_only=True, col={"sm": 12, "md": 4})
         
         # Speed can still be editable (or you can derive it from Race later!)
-        self.speed = ft.TextField(label="Speed", value=str(model.speed), data="speed", on_change=self.on_header_change, col={"sm": 12, "md": 4})
+        self.speed = ft.TextField(label="Speed", value=str(model.speed), data="speed", on_change=self.controller.handle_header_change, col={"sm": 12, "md": 4})
 
         # --- 2. Build the Layout ---
         self.content = ft.ResponsiveRow(

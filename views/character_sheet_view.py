@@ -5,20 +5,20 @@ from views.components.character_header_container import CharacterHeaderContainer
 from views.components.ac_initiative_speed_container import AcInitiativeSpeed
 
 class CharacterSheetView(ft.Container):
-    def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler, on_skill_proficiency_change_handler):
+    def __init__(self, model: CharacterModel, controller):
         super().__init__(expand=True)
         self.model = model
-        
-        self.on_score_change = on_score_change_handler
-        self.on_header_change = on_header_change_handler
-        self.on_skill_proficiency_change = on_skill_proficiency_change_handler
+        self.controller = self.controller
 
         self.ability_score_containers = []
         self.content = self.build_ui()
 
     def build_ui(self):
-        self.header = CharacterHeaderContainer(self.model, self.on_header_change)
-        self.achpspeed = AcInitiativeSpeed(self.model, self.on_header_change)
+        '''
+        Assembles child rows, columns, and containers
+        '''
+        self.header = CharacterHeaderContainer(self.model, self.controller)
+        self.achpspeed = AcInitiativeSpeed(self.model, self.controller)
         self.proficiency_bonus_field = ft.TextField(
             label="Proficiency Bonus",
             value=self.model.format_modifier(self.model.proficiency_bonus),
@@ -74,8 +74,7 @@ class CharacterSheetView(ft.Container):
             card = AbilityScoreContainer(
                 model=self.model,
                 ability_name=ability_name,
-                on_score_change=self.on_score_change,
-                on_skill_proficiency_change=self.on_skill_proficiency_change
+                controller=self.controller
             )
             containers.append(card)
         return containers

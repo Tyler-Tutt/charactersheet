@@ -11,9 +11,7 @@ class CharacterSheetController:
         
         self.view = CharacterSheetView(
             model=self.model, 
-            on_score_change_handler=self.handle_score_change, 
-            on_header_change_handler=self.handle_header_change,
-            on_skill_proficiency_change_handler=self.handle_skill_proficiency_change
+            controller=self
         )
 
     def get_view(self):
@@ -44,7 +42,10 @@ class CharacterSheetController:
                 card.update_card_data()
 
     def handle_skill_proficiency_change(self, e: ft.ControlEvent):
-        """Fired when a user clicks a skill proficiency checkbox."""
+        """
+        Triggers when a user clicks a skill proficiency checkbox.
+        
+        """
         # e.control.data contains our dict {"ability": "Dexterity", "skill": "Stealth"}
         ability_name = e.control.data["ability"]
         skill_name = e.control.data["skill"]
@@ -59,7 +60,7 @@ class CharacterSheetController:
                 card.update_card_data()
                 break
 
-    def handle_score_change(self, ability_name: str, new_score: int):
+    def handle_ability_score_change(self, ability_name: str, new_score: int):
         """Updates the model and triggers UI updates when an Ability Score changes."""
         if ability_name in self.model.ability_scores:
             self.model.ability_scores[ability_name]["score"] = new_score
