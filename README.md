@@ -1,22 +1,16 @@
-# It's a Character Sheet. Not a Character App.
+# D&D 5e Dynamic Character Sheet
 
-# Multi-Platform Character Sheet
+# Multi-Platform
 - Windows, Linux, MacOS, Android, iOS
-- Python Backend
 - [Flet GUI](https://flet.dev/docs/)
+- Python Backend
 - SQLite Database
 
 # File Structure:
 - Project folder on Windows file system
-- Use Linux (WSL) as primary dev environment
 - Windows for testing & file storage
 
-# Environments:
-- pip's (libraries) need to be maintained in (installed in) both the Linux & Windows Virtual Environments
-
-# Initial Dev Environment:
-## Create Linux Virtual Environment:
-    python3 -m venv .venv
+# Initial Dev Environment Setup:
 ## Create Windows Virtual Environment:
     python -m venv .venv_win
 ## Install dependencies
@@ -24,6 +18,9 @@
 ## Change python Interpreter
     Ctrl + Shift + P → select virtual environment interpreter
     Ctrl + Shift + P → Reload Window if necessary
+## If using WSL
+### Create Linux Virtual Environment:
+    python3 -m venv .venv
 ## To run the UI
 flet run .\main_fley.py
 

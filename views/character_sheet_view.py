@@ -1,8 +1,8 @@
 import flet as ft
 from models.character_model import CharacterModel
-from views.ability_score_container import AbilityScoreContainer
-from views.character_header_container import CharacterHeaderContainer
-from views.ac_initiative_speed import AcInitiativeSpeed
+from views.components.ability_score_container import AbilityScoreContainer
+from views.components.character_header_container import CharacterHeaderContainer
+from views.components.ac_initiative_speed_container import AcInitiativeSpeed
 
 class CharacterSheetView(ft.Container):
     def __init__(self, model: CharacterModel, on_score_change_handler, on_header_change_handler, on_skill_proficiency_change_handler):

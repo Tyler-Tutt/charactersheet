@@ -37,12 +37,9 @@ class CharacterSheetController:
         
         setattr(self.model, attr_name, new_value)
 
-        # SENIOR TIP: If level changes, Proficiency Bonus changes! 
         if attr_name == 'level':
-            # 🟢 1. Update the Proficiency Bonus field itself
             self.view.update_proficiency_bonus()
             
-            # 2. Tell all Ability Cards to recalculate their skill modifiers
             for card in self.view.ability_score_containers:
                 card.update_card_data()
 
