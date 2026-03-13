@@ -109,22 +109,35 @@ class AbilityScoreContainer(ft.Container):
         if self.controller:
             self.controller.handle_ability_score_change(self.ability_name, new_score)
 
-    #TODO Is this function actually used anywhere?
     def update_card_data(self):
-        """Pulls fresh data from the model and updates the UI."""
-        # Update main score and modifier
-        score = self.model.ability_scores[self.ability_name]["base_score"]
+        """Pulls fresh data from the model and updates the UI based on current mode."""
+        # Check if we are currently in edit mode by checking our own text field's state
+        is_edit = not self.score_field.read_only
+        
+        # Update main score based on edit state
+        if is_edit:
+            score = self.model.ability_scores[self.ability_name]["base_score"]
+        else:
+            score = self.model.get_final_ability_score(self.ability_name)
+            
         self.score_field.value = str(score)
         self.modifier_text.value = self.model.format_modifier((score - 10) // 2)
         
-        # Update all skill checkboxes and modifier fields
-        skills_data = self.model.ability_scores[self.ability_name]["skills"]
+        # Update checkboxes and derived modifiers
         for skill_name, mod_field in self.skill_modifier_fields.items():
             # Get fresh derived modifier
             new_mod_val = self.model.get_skill_modifier(self.ability_name, skill_name)
             mod_field.value = self.model.format_modifier(new_mod_val)
+            
+        for checkbox in self.skill_checkboxes:
+            skill_name = checkbox.data["skill"]
+            if is_edit:
+                checkbox.value = self.model.ability_scores[self.ability_name]["skills"][skill_name]["base_proficient"]
+            else:
+                checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
         
-        self.update()
+        if self.page:
+            self.update()
 
     def set_edit_mode(self, is_edit: bool):
         self.score_field.read_only = not is_edit

@@ -112,17 +112,6 @@ class CharacterModel():
         """Helper to safely format a modifier with a + or -"""
         return f"+{mod}" if mod >= 0 else str(mod)
 
-    def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
-        """Calculates the final skill modifier (Ability Mod + Prof Bonus if proficient)."""
-        score = self.ability_scores.get(ability_name, {}).get("score", 10)
-        base_mod = (score - 10) // 2
-        
-        is_proficient = self.ability_scores.get(ability_name, {}).get("skills", {}).get(skill_name, {}).get("proficient", False)
-        
-        if is_proficient:
-            return base_mod + self.proficiency_bonus
-        return base_mod
-
     # --- SAVE / LOAD ---
     def load_character(self, character_name):
         data = database.load_character(character_name)
@@ -139,7 +128,7 @@ class CharacterModel():
         self.alignment = data.get('alignment', "Alignment")
         self.experience_points = data.get('experience_points', 0)
         self.base_speed = data.get('base_speed', 30)
-        self.max_hp = data.get('base_max_hp', 10)
+        self.base_max_hp = data.get('base_max_hp', 10)
         self.current_hp = data.get('current_hp', 10)
         self.temp_hp = data.get('temp_hp', 0)
         
@@ -159,7 +148,7 @@ class CharacterModel():
             'alignment': self.alignment,
             'experience_points': self.experience_points,
             'base_speed': self.base_speed,
-            'base_max_hp': self.max_hp,
+            'base_max_hp': self.base_max_hp,
             'current_hp': self.current_hp,
             'temp_hp': self.temp_hp,
             'abilities': self.ability_scores
