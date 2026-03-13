@@ -82,3 +82,10 @@ class CharacterSheetView(ft.Container):
         """Pulls fresh Proficiency Bonus from the Model and updates the UI."""
         self.proficiency_bonus_field.value = self.model.format_modifier(self.model.proficiency_bonus)
         self.proficiency_bonus_field.update()
+
+    def set_edit_mode(self, is_edit: bool):
+        """Passes the edit mode state down to all sub-components."""
+        self.header.set_edit_mode(is_edit)
+        self.achpspeed.set_edit_mode(is_edit)
+        for card in self.ability_score_containers:
+            card.set_edit_mode(is_edit)

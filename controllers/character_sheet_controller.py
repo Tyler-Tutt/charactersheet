@@ -8,11 +8,27 @@ class CharacterSheetController:
     def __init__(self, page: ft.Page):
         self.page = page
         self.model = CharacterModel()
+        self.is_edit_mode = False
         
         self.view = CharacterSheetView(
             model=self.model, 
             controller=self
         )
+
+        self.view.set_edit_mode(self.is_edit_mode)
+
+    def toggle_edit_mode(self, e):
+        """Toggles between edit and view modes and updates the UI."""
+        self.is_edit_mode = not self.is_edit_mode
+        self.view.set_edit_mode(self.is_edit_mode)
+        
+        # Update the Appbar icon dynamically
+        e.control.icon = ft.Icons.EDIT if self.is_edit_mode else ft.Icons.EDIT_OFF
+        e.control.tooltip = "Switch to View Mode" if self.is_edit_mode else "Switch to Edit Mode"
+        e.control.update() 
+        
+        mode_text = "Edit Mode Enabled" if self.is_edit_mode else "Viewing Mode"
+        self.page.open(ft.SnackBar(ft.Text(mode_text), duration=1500))
 
     def get_view(self):
         return self.view

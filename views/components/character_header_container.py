@@ -78,3 +78,20 @@ class CharacterHeaderContainer(ft.Container):
         
         # Tell Flet to redraw ONLY this header card!
         self.update()
+
+    def set_edit_mode(self, is_edit: bool):
+        # Invert the boolean: if is_edit is True, read_only is False
+        read_only_state = not is_edit 
+        
+        self.charactername_field.read_only = read_only_state
+        self.class_field.read_only = read_only_state
+        self.level_field.read_only = read_only_state
+        self.background_field.read_only = read_only_state
+        self.player_name_field.read_only = read_only_state
+        self.race_field.read_only = read_only_state
+        self.alignment_field.read_only = read_only_state
+        self.experience_points_field.read_only = read_only_state
+        
+        # Only update if the control is attached to the page
+        if self.page:
+            self.update()

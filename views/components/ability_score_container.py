@@ -18,6 +18,8 @@ class AbilityScoreContainer(ft.Container):
         
         # We will store references to the skill modifier fields here so we can update them later
         self.skill_modifier_fields = {}
+        # <-- A list to track checkboxes
+        self.skill_checkboxes = [] 
         
         # --- Internal UI Elements ---
         initial_score = self.model.ability_scores[ability_name]["score"]
@@ -57,6 +59,7 @@ class AbilityScoreContainer(ft.Container):
                 on_change=self.controller.handle_skill_proficiency_change,
                 col={"sm": 2, "md": 2}
             )
+            self.skill_checkboxes.append(prof_checkbox) # <-- Track the checkbox
             
             self.skills_controls.append(
                 ft.ResponsiveRow(
@@ -121,3 +124,13 @@ class AbilityScoreContainer(ft.Container):
             mod_field.value = self.model.format_modifier(new_mod_val)
         
         self.update()
+
+    def set_edit_mode(self, is_edit: bool):
+        self.score_field.read_only = not is_edit
+        
+        for checkbox in self.skill_checkboxes:
+            checkbox.disabled = not is_edit
+            
+        # Only update if the control is attached to the page
+        if self.page:
+            self.update()

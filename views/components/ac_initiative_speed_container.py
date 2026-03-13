@@ -21,7 +21,6 @@ class AcInitiativeSpeed(ft.Container):
 
         # --- 1. Define the UI Controls ---
         self.armor_class = ft.TextField(label="Armor Class", value=str(model.armor_class), read_only=True, col={"sm": 12, "md": 4})
-        # Format initiative to show a + if positive
         initiative_string = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
         self.initiative = ft.TextField(label="Initiative", value=initiative_string, read_only=True, col={"sm": 12, "md": 4})
         
@@ -48,3 +47,10 @@ class AcInitiativeSpeed(ft.Container):
         
         # Tell Flet to redraw ONLY this card
         self.update()
+
+    def set_edit_mode(self, is_edit: bool):
+        # Speed is the only manually editable field here currently
+        self.speed.read_only = not is_edit
+        # Only update if the control is attached to the page
+        if self.page:
+            self.update()

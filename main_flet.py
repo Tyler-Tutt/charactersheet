@@ -17,6 +17,11 @@ def main(page: ft.Page):
         title=ft.Text("Flet Character Sheet"),
         actions=[
             ft.IconButton(
+                icon=ft.Icons.EDIT_OFF, # Start in view mode
+                on_click=app_controller.toggle_edit_mode, 
+                tooltip="Switch to Edit Mode"
+            ),
+            ft.IconButton(
                 ft.Icons.SAVE, 
                 on_click=app_controller.save_character, 
                 tooltip="Save Character"
