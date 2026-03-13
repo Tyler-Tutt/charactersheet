@@ -22,7 +22,7 @@ class AbilityScoreContainer(ft.Container):
         self.skill_checkboxes = [] 
         
         # --- Internal UI Elements ---
-        initial_score = self.model.ability_scores[ability_name]["score"]
+        initial_score = self.model.ability_scores[ability_name]["base_score"]
         
         self.ability_name_text = ft.Text(ability_name.upper(), size=16, weight=ft.FontWeight.BOLD)
         self.modifier_text = ft.Text(self.model.format_modifier((initial_score - 10) // 2), size=20)
@@ -54,7 +54,7 @@ class AbilityScoreContainer(ft.Container):
             
             # The Checkbox. We use 'data' to pass a dictionary so the handler knows EXACTLY what was clicked.
             prof_checkbox = ft.Checkbox(
-                value=skill_info["proficient"], 
+                value=skill_info["base_proficient"], 
                 data={"ability": self.ability_name, "skill": skill_name},
                 on_change=self.controller.handle_skill_proficiency_change,
                 col={"sm": 2, "md": 2}
@@ -109,10 +109,11 @@ class AbilityScoreContainer(ft.Container):
         if self.controller:
             self.controller.handle_ability_score_change(self.ability_name, new_score)
 
+    #TODO Is this function actually used anywhere?
     def update_card_data(self):
         """Pulls fresh data from the model and updates the UI."""
         # Update main score and modifier
-        score = self.model.ability_scores[self.ability_name]["score"]
+        score = self.model.ability_scores[self.ability_name]["base_score"]
         self.score_field.value = str(score)
         self.modifier_text.value = self.model.format_modifier((score - 10) // 2)
         
@@ -128,9 +129,25 @@ class AbilityScoreContainer(ft.Container):
     def set_edit_mode(self, is_edit: bool):
         self.score_field.read_only = not is_edit
         
+        # --- The Magic Swap for Ability Scores ---
+        if is_edit:
+            # Show the raw, editable base score
+            base_val = self.model.ability_scores[self.ability_name]["base_score"]
+            self.score_field.value = str(base_val)
+        else:
+            # Show the final buffed/debuffed score
+            final_val = self.model.get_final_ability_score(self.ability_name)
+            self.score_field.value = str(final_val)
+
+        # Update Checkboxes based on mode
         for checkbox in self.skill_checkboxes:
             checkbox.disabled = not is_edit
+            skill_name = checkbox.data["skill"]
             
-        # Only update if the control is attached to the page
+            if is_edit:
+                checkbox.value = self.model.ability_scores[self.ability_name]["skills"][skill_name]["base_proficient"]
+            else:
+                checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
+
         if self.page:
             self.update()

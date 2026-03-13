@@ -51,6 +51,11 @@ class CharacterSheetController:
         
         setattr(self.model, attr_name, new_value)
 
+        if attr_name == 'speed':
+            self.model.base_speed = new_value
+        else:
+            setattr(self.model, attr_name, new_value)
+
         if attr_name == 'level':
             self.view.update_proficiency_bonus()
             
@@ -79,7 +84,7 @@ class CharacterSheetController:
     def handle_ability_score_change(self, ability_name: str, new_score: int):
         """Updates the model and triggers UI updates when an Ability Score changes."""
         if ability_name in self.model.ability_scores:
-            self.model.ability_scores[ability_name]["score"] = new_score
+            self.model.ability_scores[ability_name]["base_score"] = new_score
 
         if ability_name == "Dexterity":
             self.view.achpspeed.update_stats_data(self.model)

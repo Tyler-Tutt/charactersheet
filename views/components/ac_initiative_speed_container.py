@@ -18,6 +18,7 @@ class AcInitiativeSpeed(ft.Container):
         )
         
         self.controller = controller
+        self.model = model
 
         # --- 1. Define the UI Controls ---
         self.armor_class = ft.TextField(label="Armor Class", value=str(model.armor_class), read_only=True, col={"sm": 12, "md": 4})
@@ -25,7 +26,7 @@ class AcInitiativeSpeed(ft.Container):
         self.initiative = ft.TextField(label="Initiative", value=initiative_string, read_only=True, col={"sm": 12, "md": 4})
         
         # Speed can still be editable (or you can derive it from Race later!)
-        self.speed = ft.TextField(label="Speed", value=str(model.speed), data="speed", on_change=self.controller.handle_header_change, col={"sm": 12, "md": 4})
+        self.speed = ft.TextField(label="Speed", value=str(model.base_speed), data="speed", on_change=self.controller.handle_header_change, col={"sm": 12, "md": 4})
 
         # --- 2. Build the Layout ---
         self.content = ft.ResponsiveRow(
@@ -43,7 +44,7 @@ class AcInitiativeSpeed(ft.Container):
         init_str = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
         self.initiative.value = init_str
         
-        self.speed.value = str(model.speed)
+        self.speed.value = str(model.base_speed)
         
         # Tell Flet to redraw ONLY this card
         self.update()
@@ -51,6 +52,11 @@ class AcInitiativeSpeed(ft.Container):
     def set_edit_mode(self, is_edit: bool):
         # Speed is the only manually editable field here currently
         self.speed.read_only = not is_edit
+        if is_edit:
+            self.speed.value = str(self.model.base_speed)
+        else:
+            self.speed.value = str(self.model.final_speed)
+        
         # Only update if the control is attached to the page
         if self.page:
             self.update()

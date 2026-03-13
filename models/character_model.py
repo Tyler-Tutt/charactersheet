@@ -11,10 +11,14 @@ class CharacterModel():
         self.race = "Race"
         self.alignment = "Alignment"
         self.experience_points = 0
-        self.speed = 30
-        self.max_hp = 10
+        self.base_speed = 30
+        self.base_max_hp = 10
         self.current_hp = 10
         self.temp_hp = 0
+
+        # --- Future-Proofing: Modifier List ---
+        # Later, you will append dicts or objects here like {"target": "speed", "value": 10, "source": "Boots of Speed"}
+        self.active_modifiers = []
 
         # --- Ability & Skill Data ---
         self.abilities_list = [
@@ -33,9 +37,9 @@ class CharacterModel():
         self.ability_scores = {}
         for ability in self.abilities_list:
             self.ability_scores[ability] = {
-                "score": 10,
+                "base_score": 10,
                 "skills": {
-                    skill: {"proficient": False}
+                    skill: {"base_proficient": False}
                     for skill in self.skills_map[ability]
                 }
             }
@@ -60,22 +64,48 @@ class CharacterModel():
             return 6
         return 0
     
+    # --- DERIVED PROPERTIES (The "Final" Values) ---
+    
+    @property
+    def final_speed(self) -> int:
+        """Calculates final speed: Base + Modifiers"""
+        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "speed")
+        return self.base_speed + bonus
+
+    def get_final_ability_score(self, ability_name: str) -> int:
+        """Calculates final ability score: Base + Modifiers"""
+        base = self.ability_scores.get(ability_name, {}).get("base_score", 10)
+        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == ability_name)
+        return base + bonus
+
+    def is_skill_proficient(self, ability_name: str, skill_name: str) -> bool:
+        """Checks if a skill is proficient (Base + Feature overrides like 'Jack of All Trades')"""
+        base_prof = self.ability_scores.get(ability_name, {}).get("skills", {}).get(skill_name, {}).get("base_proficient", False)
+        # In the future, check self.active_modifiers for skill overriding features here
+        return base_prof
+
     @property
     def initiative(self) -> int:
-        '''
-        0 + Dexteridy Modifier
-        '''
-        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
-        return (score - 10) // 2
+        """Derived from FINAL Dexterity"""
+        final_dex = self.get_final_ability_score("Dexterity")
+        return (final_dex - 10) // 2
 
     @property
     def armor_class(self) -> int:
-        '''
-        10 + Dexteridy Modifier
-        '''
-        score = self.ability_scores.get("Dexterity", {}).get("score", 10)
-        dex_mod = (score - 10) // 2
-        return 10 + dex_mod
+        """Derived from FINAL Dexterity (Placeholder for armor calculation)"""
+        final_dex = self.get_final_ability_score("Dexterity")
+        dex_mod = (final_dex - 10) // 2
+        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "ac")
+        return 10 + dex_mod + bonus
+
+    def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
+        """Calculates the final skill modifier using FINAL Ability Score and FINAL Proficiency."""
+        final_score = self.get_final_ability_score(ability_name)
+        base_mod = (final_score - 10) // 2
+        
+        if self.is_skill_proficient(ability_name, skill_name):
+            return base_mod + self.proficiency_bonus
+        return base_mod
 
     # --- HELPER METHODS ---
     def format_modifier(self, mod: int) -> str:
@@ -108,8 +138,8 @@ class CharacterModel():
         self.race = data.get('race', "Race")
         self.alignment = data.get('alignment', "Alignment")
         self.experience_points = data.get('experience_points', 0)
-        self.speed = data.get('speed', 30)
-        self.max_hp = data.get('max_hp', 10)
+        self.base_speed = data.get('base_speed', 30)
+        self.max_hp = data.get('base_max_hp', 10)
         self.current_hp = data.get('current_hp', 10)
         self.temp_hp = data.get('temp_hp', 0)
         
@@ -128,8 +158,8 @@ class CharacterModel():
             'race': self.race,
             'alignment': self.alignment,
             'experience_points': self.experience_points,
-            'speed': self.speed,
-            'max_hp': self.max_hp,
+            'base_speed': self.base_speed,
+            'base_max_hp': self.max_hp,
             'current_hp': self.current_hp,
             'temp_hp': self.temp_hp,
             'abilities': self.ability_scores
