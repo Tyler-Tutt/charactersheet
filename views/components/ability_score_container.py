@@ -54,7 +54,7 @@ class AbilityScoreContainer(ft.Container):
             
             # The Checkbox. We use 'data' to pass a dictionary so the handler knows EXACTLY what was clicked.
             prof_checkbox = ft.Checkbox(
-                value=skill_info["base_proficient"], 
+                value=skill_info.base_proficient, 
                 data={"ability": self.ability_name, "skill": skill_name},
                 on_change=self.controller.handle_skill_proficiency_change,
                 col={"sm": 2, "md": 2}
@@ -132,7 +132,7 @@ class AbilityScoreContainer(ft.Container):
         for checkbox in self.skill_checkboxes:
             skill_name = checkbox.data["skill"]
             if is_edit:
-                checkbox.value = self.model.ability_scores[self.ability_name]["skills"][skill_name]["base_proficient"]
+                checkbox.value = self.model.ability_scores[self.ability_name].skills[skill_name].base_proficient
             else:
                 checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
         
@@ -158,7 +158,7 @@ class AbilityScoreContainer(ft.Container):
             skill_name = checkbox.data["skill"]
             
             if is_edit:
-                checkbox.value = self.model.ability_scores[self.ability_name]["skills"][skill_name]["base_proficient"]
+                checkbox.value = self.model.ability_scores[self.ability_name].skills[skill_name].base_proficient
             else:
                 checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
 
