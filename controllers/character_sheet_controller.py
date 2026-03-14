@@ -85,15 +85,13 @@ class CharacterSheetController:
         Responds to users toggling skill proficiency checkboxes by updating the specific skill's status within the data model. 
         Optimizes performance by instructing only the relevant ability score container to redraw its UI.
         '''
-        # e.control.data contains our dict {"ability": "Dexterity", "skill": "Stealth"}
         ability_name = e.control.data["ability"]
         skill_name = e.control.data["skill"]
         is_proficient = e.control.value
 
-        # 1. Update Model
-        self.model.ability_scores[ability_name]["skills"][skill_name]["base_proficient"] = is_proficient
+        # NEW: Beautiful, clean dot notation
+        self.model.ability_scores[ability_name].skills[skill_name].base_proficient = is_proficient
         
-        # 2. Tell only the affected card to update its UI
         for card in self.view.ability_score_containers:
             if card.ability_name == ability_name:
                 card.update_card_data()
@@ -105,7 +103,8 @@ class CharacterSheetController:
         Ensures that a change in one stat correctly ripples through all related calculations in the view.
         '''
         if ability_name in self.model.ability_scores:
-            self.model.ability_scores[ability_name]["base_score"] = new_score
+            # NEW: Dot notation
+            self.model.ability_scores[ability_name].base_score = new_score
 
         if ability_name == "Dexterity":
             self.view.achpspeed.update_stats_data(self.model)
