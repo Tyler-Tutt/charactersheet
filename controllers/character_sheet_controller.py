@@ -37,6 +37,9 @@ class CharacterSheetController:
         e.control.icon = ft.Icons.EDIT if self.is_edit_mode else ft.Icons.EDIT_OFF
         e.control.tooltip = "Switch to View Mode" if self.is_edit_mode else "Switch to Edit Mode"
         e.control.update() 
+
+        self.page.appbar.bgcolor = ft.Colors.AMBER_300 if self.is_edit_mode else None
+        self.page.appbar.update()
         
         mode_text = "Edit Mode Enabled" if self.is_edit_mode else "Viewing Mode"
         self.page.open(ft.SnackBar(ft.Text(mode_text), duration=1500))
