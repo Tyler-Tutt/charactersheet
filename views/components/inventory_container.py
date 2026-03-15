@@ -1,14 +1,8 @@
 import flet as ft
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from models.character_model import CharacterModel
-    from controllers.character_sheet_controller import CharacterSheetController
+from models.character_model import CharacterModel
 
 class InventoryContainer(ft.Container):
-    '''
-    A ft.Container that contains a list of the Character's Items
-    '''
-    def __init__(self, model: 'CharacterModel', controller: 'CharacterSheetController'):
+    def __init__(self, model: CharacterModel):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.GREY_800,
@@ -16,14 +10,11 @@ class InventoryContainer(ft.Container):
             border_radius=8
         )
         self.model = model
-        self.controller = controller
-        
         self.item_list_column = ft.Column()
         
-        # A test button to add our Cloak
         self.add_test_item_btn = ft.ElevatedButton(
             text="Loot 'Cloak of Protection'", 
-            on_click=lambda _: self.controller.add_item_to_inventory("Cloak of Protection")
+            on_click=self._add_test_item
         )
 
         self.content = ft.Column(
@@ -34,15 +25,33 @@ class InventoryContainer(ft.Container):
                 self.item_list_column
             ]
         )
-        
         self.update_inventory_ui()
 
-    def update_inventory_ui(self):
-        """Redraws the list of inventory items based on the model."""
+    # --- Pub/Sub Subscriptions ---
+    def did_mount(self):
+        self.page.pubsub.subscribe_topic("model_updated", self.update_inventory_ui)
+        self.page.pubsub.subscribe_topic("edit_mode_changed", self.set_edit_mode)
+
+    def will_unmount(self):
+        self.page.pubsub.unsubscribe_topic("model_updated", self.update_inventory_ui)
+        self.page.pubsub.unsubscribe_topic("edit_mode_changed", self.set_edit_mode)
+
+    # --- Action Publishers ---
+    def _add_test_item(self, e):
+        e.page.pubsub.send_all_on_topic("ui_action", {"action": "add_item", "item_name": "Cloak of Protection"})
+
+    def _on_attunement_change(self, e):
+        e.page.pubsub.send_all_on_topic("ui_action", {
+            "action": "toggle_attunement",
+            "index": e.control.data,
+            "is_equipped": e.control.value
+        })
+
+    # --- Data Updaters ---
+    def update_inventory_ui(self, message=None):
         self.item_list_column.controls.clear()
         
         for index, item in enumerate(self.model.inventory):
-            # Create a row for each item
             item_row = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
@@ -51,18 +60,15 @@ class InventoryContainer(ft.Container):
                     ft.Checkbox(
                         label="Attuned", 
                         value=item.is_equipped, 
-                        data=index, # Pass the index so the controller knows WHICH item
-                        on_change=self.controller.toggle_item_attunement
+                        data=index,
+                        on_change=self._on_attunement_change
                     )
                 ]
             )
             self.item_list_column.controls.append(item_row)
             
-        if self.page:
-            self.update()
+        self.update()
             
     def set_edit_mode(self, is_edit: bool):
-        # Optional: Hide the add button if not in edit mode
         self.add_test_item_btn.visible = is_edit
-        if self.page:
-            self.update()
+        self.update()

@@ -19,10 +19,8 @@ class CharacterSheetController:
         self.model = CharacterModel()
         self.is_edit_mode = False
         
-        self.view = CharacterSheetView(
-            model=self.model, 
-            controller=self
-        )
+        self.view = CharacterSheetView(model=self.model)
+        self.page.pubsub.subscribe_topic("ui_action", self.handle_ui_action)
 
         self.view.set_edit_mode(self.is_edit_mode)
 
@@ -32,9 +30,10 @@ class CharacterSheetController:
         It dynamically modifies UI elements like icons and tooltips while providing visual feedback to the user via a SnackBar.
         '''
         self.is_edit_mode = not self.is_edit_mode
-        self.view.set_edit_mode(self.is_edit_mode)
+
+        # Broadcast the edit mode change globally
+        self.page.pubsub.send_all_on_topic("edit_mode_changed", self.is_edit_mode)
         
-        # Update the Appbar icon dynamically
         e.control.icon = ft.Icons.EDIT if self.is_edit_mode else ft.Icons.EDIT_OFF
         e.control.tooltip = "Switch to View Mode" if self.is_edit_mode else "Switch to Edit Mode"
         e.control.update() 
@@ -53,6 +52,60 @@ class CharacterSheetController:
         return self.view
 
     # --- Event Handlers ---
+
+    # --- The Central Action Hub ---
+    def handle_ui_action(self, message: dict):
+        """Listens for actions broadcasted by UI components, updates model, and triggers a UI refresh."""
+        action = message.get("action")
+
+        if action == "update_header":
+            attr_name = message["attr"]
+            new_value = message["value"]
+            old_value = getattr(self.model, attr_name, None)
+            
+            if attr_name in ['level', 'experience_points', 'speed', 'max_hp', 'current_hp', 'temp_hp']:
+                try:
+                    new_value = int(new_value)
+                except (ValueError, TypeError):
+                    new_value = old_value 
+            
+            if attr_name == 'speed':
+                self.model.base_speed = new_value
+            else:
+                setattr(self.model, attr_name, new_value)
+
+        elif action == "toggle_proficiency":
+            ability_name = message["ability"]
+            skill_name = message["skill"]
+            self.model.ability_scores_list[ability_name].skills[skill_name].base_proficient = message["is_proficient"]
+
+        elif action == "update_ability":
+            ability_name = message["ability"]
+            if ability_name in self.model.ability_scores_list:
+                self.model.ability_scores_list[ability_name].base_score = message["score"]
+
+        elif action == "add_item":
+            item_name = message["item_name"]
+            item_data = database.get_item_definition(item_name)
+            if item_data:
+                new_item = InventoryItem(
+                    name=item_name,
+                    description=item_data.get("description", ""),
+                    short_description=item_data.get("short_description", ""), # TYPO FIXED!
+                    modifiers=item_data.get("modifiers", [])
+                )
+                self.model.inventory.append(new_item)
+                self.page.open(ft.SnackBar(ft.Text(f"Added {item_name} to inventory!")))
+            else:
+                self.page.open(ft.SnackBar(ft.Text(f"Item {item_name} not found in database."), bgcolor=ft.Colors.ERROR))
+
+        elif action == "toggle_attunement":
+            item_index = message["index"]
+            self.model.inventory[item_index].is_equipped = message["is_equipped"]
+            self.model.update_active_modifiers()
+
+        # The Magic Step: Tell the entire app that the model has changed!
+        self.page.pubsub.send_all_on_topic("model_updated", "update")
 
     def handle_header_change(self, e: ft.ControlEvent):
         '''
@@ -125,7 +178,7 @@ class CharacterSheetController:
             new_item = InventoryItem(
                 name=item_name,
                 description=item_data.get("description", ""),
-                short_description=item_data.get("short_descriptipn",""),
+                short_description=item_data.get("short_description",""),
                 modifiers=item_data.get("modifiers", [])
             )
             self.model.inventory.append(new_item)
@@ -182,7 +235,8 @@ class CharacterSheetController:
 
         def handle_load(char_to_load):
             if self.model.load_character(char_to_load):
-                self.update_view_from_model()
+                # Broadcast the model update so views refresh!
+                self.page.pubsub.send_all_on_topic("model_updated", "load")
                 self.page.close(modal) 
                 self.page.open(ft.SnackBar(ft.Text(f"Loaded {char_to_load}!"))) 
             else:
@@ -191,9 +245,5 @@ class CharacterSheetController:
         def handle_cancel():
             self.page.close(modal)
 
-        modal = LoadCharacterModal(
-            character_list=character_list,
-            on_load_confirm=handle_load,
-            on_cancel=handle_cancel
-        )
+        modal = LoadCharacterModal(character_list=character_list, on_load_confirm=handle_load, on_cancel=handle_cancel)
         self.page.open(modal)

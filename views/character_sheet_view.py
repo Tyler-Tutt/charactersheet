@@ -6,27 +6,34 @@ from views.components.ac_initiative_speed_container import AcInitiativeSpeed
 from views.components.inventory_container import InventoryContainer
 
 class CharacterSheetView(ft.Container):
-    def __init__(self, model: CharacterModel, controller):
+    def __init__(self, model: CharacterModel):
         super().__init__(expand=True)
         self.model = model
-        self.controller = controller
         self.ability_score_containers = []
         self.content = self.build_ui()
 
+    # --- Flet Lifecycle Methods for Pub/Sub ---
+    def did_mount(self):
+        self.page.pubsub.subscribe_topic("model_updated", self.handle_model_update)
+
+    def will_unmount(self):
+        self.page.pubsub.unsubscribe_topic("model_updated", self.handle_model_update)
+
+    def handle_model_update(self, message):
+        """Updates components living strictly in this root view."""
+        self.proficiency_bonus_field.value = self.model.format_modifier(self.model.proficiency_bonus)
+        self.proficiency_bonus_field.update()
+
     def build_ui(self):
-        '''
-        Assembles child rows, columns, and containers
-        '''
-        self.header = CharacterHeaderContainer(self.model, self.controller)
-        self.achpspeed = AcInitiativeSpeed(self.model, self.controller)
+        self.header = CharacterHeaderContainer(self.model)
+        self.achpspeed = AcInitiativeSpeed(self.model)
         self.proficiency_bonus_field = ft.TextField(
             label="Proficiency Bonus",
             value=self.model.format_modifier(self.model.proficiency_bonus),
             read_only=True,
             text_align=ft.TextAlign.CENTER,
-            # weight=ft.FontWeight.BOLD,
         )
-        self.inventory_container = InventoryContainer(self.model, self.controller)
+        self.inventory_container = InventoryContainer(self.model)
         self.second_row_container = self._create_row_2()
         
         return ft.Column(
@@ -48,23 +55,12 @@ class CharacterSheetView(ft.Container):
                 controls=[
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[
-                            self.proficiency_bonus_field,
-                            *self.ability_score_containers
-                            ]
+                        controls=[self.proficiency_bonus_field, *self.ability_score_containers]
                     ),
+                    ft.Column(col={"sm": 12, "md": 4}, controls=[self.achpspeed]),
                     ft.Column(
                         col={"sm": 12, "md": 4},
-                        controls=[
-                            self.achpspeed
-                            ]
-                    ),
-                    ft.Column(
-                        col={"sm": 12, "md": 4},
-                        controls=[
-                            ft.Text("Features & Traits"),
-                            self.inventory_container
-                            ]
+                        controls=[ft.Text("Features & Traits"), self.inventory_container]
                     )
                 ]
             )
@@ -73,23 +69,6 @@ class CharacterSheetView(ft.Container):
     def _create_ability_score_containers(self):
         containers = []
         for ability_name in self.model.ability_list:
-            card = AbilityScoreContainer(
-                model=self.model,
-                ability_name=ability_name,
-                controller=self.controller
-            )
+            card = AbilityScoreContainer(model=self.model, ability_name=ability_name)
             containers.append(card)
         return containers
-    
-    def update_proficiency_bonus(self):
-        """Pulls fresh Proficiency Bonus from the Model and updates the UI."""
-        self.proficiency_bonus_field.value = self.model.format_modifier(self.model.proficiency_bonus)
-        self.proficiency_bonus_field.update()
-
-    def set_edit_mode(self, is_edit: bool):
-        """Passes the edit mode state down to all sub-components."""
-        self.header.set_edit_mode(is_edit)
-        self.achpspeed.set_edit_mode(is_edit)
-        for card in self.ability_score_containers:
-            card.set_edit_mode(is_edit)
-        self.inventory_container.set_edit_mode(is_edit)

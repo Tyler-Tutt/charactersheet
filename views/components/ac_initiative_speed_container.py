@@ -1,62 +1,50 @@
 import flet as ft
-from typing import TYPE_CHECKING
 from models.character_model import CharacterModel
-if TYPE_CHECKING:
-    from controllers.character_sheet_controller import CharacterSheetController
-
 
 class AcInitiativeSpeed(ft.Container):
-    '''
-    Contains Armor Class, Initiative, and Speed fields
-    '''
-    def __init__(self, model: CharacterModel, controller: 'CharacterSheetController'):
+    def __init__(self, model: CharacterModel):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.RED_200,
             border=ft.border.all(2, ft.Colors.OUTLINE),
             border_radius=8
         )
-        
-        self.controller = controller
         self.model = model
 
-        # --- 1. Define the UI Controls ---
         self.armor_class = ft.TextField(label="Armor Class", value=str(model.armor_class), read_only=True, col={"sm": 12, "md": 4})
         initiative_string = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
         self.initiative = ft.TextField(label="Initiative", value=initiative_string, read_only=True, col={"sm": 12, "md": 4})
-        
-        # Speed can still be editable (or you can derive it from Race later!)
-        self.speed = ft.TextField(label="Speed", value=str(model.base_speed), data="speed", on_change=self.controller.handle_header_change, col={"sm": 12, "md": 4})
+        self.speed = ft.TextField(label="Speed", value=str(model.base_speed), data="speed", on_change=self._on_speed_change, col={"sm": 12, "md": 4})
 
-        # --- 2. Build the Layout ---
-        self.content = ft.ResponsiveRow(
-            controls=[
-                self.armor_class,
-                self.initiative,
-                self.speed,
-            ]
-        )
+        self.content = ft.ResponsiveRow(controls=[self.armor_class, self.initiative, self.speed])
 
-    def update_stats_data(self, model: CharacterModel):
-        """Called by the main controller to refresh UI from the Model."""
-        self.armor_class.value = str(model.armor_class)
-        
-        init_str = f"+{model.initiative}" if model.initiative >= 0 else str(model.initiative)
-        self.initiative.value = init_str
-        
-        self.speed.value = str(model.base_speed)
-        
-        # Tell Flet to redraw ONLY this card
+    # --- Pub/Sub Subscriptions ---
+    def did_mount(self):
+        self.page.pubsub.subscribe_topic("model_updated", self.update_stats_data)
+        self.page.pubsub.subscribe_topic("edit_mode_changed", self.set_edit_mode)
+
+    def will_unmount(self):
+        self.page.pubsub.unsubscribe_topic("model_updated", self.update_stats_data)
+        self.page.pubsub.unsubscribe_topic("edit_mode_changed", self.set_edit_mode)
+
+    # --- Action Publishers ---
+    def _on_speed_change(self, e):
+        e.page.pubsub.send_all_on_topic("ui_action", {
+            "action": "update_header", 
+            "attr": "speed", 
+            "value": e.control.value
+        })
+
+    # --- Data Updaters ---
+    def update_stats_data(self, message=None):
+        self.armor_class.value = str(self.model.armor_class)
+        self.initiative.value = f"+{self.model.initiative}" if self.model.initiative >= 0 else str(self.model.initiative)
+        # Update speed only if not in edit mode so we don't overwrite user typing
+        if self.speed.read_only:
+            self.speed.value = str(self.model.final_speed)
         self.update()
 
     def set_edit_mode(self, is_edit: bool):
-        # Speed is the only manually editable field here currently
         self.speed.read_only = not is_edit
-        if is_edit:
-            self.speed.value = str(self.model.base_speed)
-        else:
-            self.speed.value = str(self.model.final_speed)
-        
-        # Only update if the control is attached to the page
-        if self.page:
-            self.update()
+        self.speed.value = str(self.model.base_speed) if is_edit else str(self.model.final_speed)
+        self.update()
