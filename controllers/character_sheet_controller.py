@@ -119,12 +119,13 @@ class CharacterSheetController:
                 break 
 
     def add_item_to_inventory(self, item_name: str):
-        """Fetches item from DB and adds to model's inventory."""
+        """Fetches item from DB and adds a copy to model's inventory."""
         item_data = database.get_item_definition(item_name)
         if item_data:
             new_item = InventoryItem(
                 name=item_name,
                 description=item_data.get("description", ""),
+                short_description=item_data.get("short_descriptipn",""),
                 modifiers=item_data.get("modifiers", [])
             )
             self.model.inventory.append(new_item)

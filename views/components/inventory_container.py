@@ -47,7 +47,7 @@ class InventoryContainer(ft.Container):
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
                     ft.Text(item.name, color=ft.Colors.WHITE, weight=ft.FontWeight.W_500, expand=True),
-                    ft.Text(item.description, color=ft.Colors.GREY_400, size=12, expand=True),
+                    ft.Text(item.short_description, color=ft.Colors.GREY_400, size=12, expand=True),
                     ft.Checkbox(
                         label="Attuned", 
                         value=item.is_equipped, 

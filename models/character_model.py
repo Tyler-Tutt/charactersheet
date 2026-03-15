@@ -4,8 +4,12 @@ from typing import Dict, List
 
 @dataclass
 class InventoryItem:
+    '''
+    Represents an individual item within a character's inventory
+    '''
     name: str
     description: str = ""
+    short_description: str = ""
     is_equipped: bool = False
     modifiers: list = field(default_factory=list)
 
