@@ -22,7 +22,7 @@ class AbilityScoreContainer(ft.Container):
         self.skill_checkboxes = [] 
         
         # --- Internal UI Elements ---
-        initial_score = self.model.ability_scores[ability_name].base_score
+        initial_score = self.model.ability_scores_list[ability_name].base_score
         
         self.ability_name_text = ft.Text(ability_name.upper(), size=16, weight=ft.FontWeight.BOLD)
         self.modifier_text = ft.Text(self.model.format_modifier((initial_score - 10) // 2), size=20)
@@ -35,7 +35,7 @@ class AbilityScoreContainer(ft.Container):
         
         # --- Build Skills UI ---
         self.skills_controls = []
-        skills_data = self.model.ability_scores[ability_name].skills
+        skills_data = self.model.ability_scores_list[ability_name].skills
         
         for skill_name, skill_info in skills_data.items():
             
@@ -116,7 +116,7 @@ class AbilityScoreContainer(ft.Container):
         
         # Update main score based on edit state
         if is_edit:
-            score = self.model.ability_scores[self.ability_name].base_score
+            score = self.model.ability_scores_list[self.ability_name].base_score
         else:
             score = self.model.get_final_ability_score(self.ability_name)
             
@@ -132,7 +132,7 @@ class AbilityScoreContainer(ft.Container):
         for checkbox in self.skill_checkboxes:
             skill_name = checkbox.data["skill"]
             if is_edit:
-                checkbox.value = self.model.ability_scores[self.ability_name].skills[skill_name].base_proficient
+                checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient
             else:
                 checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
         
@@ -145,7 +145,7 @@ class AbilityScoreContainer(ft.Container):
         # --- The Magic Swap for Ability Scores ---
         if is_edit:
             # Show the raw, editable base score
-            base_val = self.model.ability_scores[self.ability_name].base_score
+            base_val = self.model.ability_scores_list[self.ability_name].base_score
             self.score_field.value = str(base_val)
         else:
             # Show the final buffed/debuffed score
@@ -158,7 +158,7 @@ class AbilityScoreContainer(ft.Container):
             skill_name = checkbox.data["skill"]
             
             if is_edit:
-                checkbox.value = self.model.ability_scores[self.ability_name].skills[skill_name].base_proficient
+                checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient
             else:
                 checkbox.value = self.model.is_skill_proficient(self.ability_name, skill_name)
 

@@ -4,14 +4,23 @@ from typing import Dict
 
 @dataclass
 class Skill:
+    '''
+    Represents an individual character skill (Stealth, Arcana, Perception, etc.)
+    '''
     base_proficient: bool = False
 
 @dataclass
 class Ability:
+    '''
+    Represents an individual character Ability Score (Strength, Charisma, etc.)
+    '''
     base_score: int = 10
     skills: Dict[str, Skill] = field(default_factory=dict)
 
 class CharacterModel():
+    '''
+    Represents & Defines the data (fields) of a Character
+    '''
     def __init__(self, character_to_load=None):
         # --- Character Attributes ---
         self.charactername = "Character Name"
@@ -32,11 +41,11 @@ class CharacterModel():
         self.active_modifiers = []
 
         # --- Ability & Skill Data ---
-        self.abilities_list = [
+        self.ability_list = [
             "Strength", "Dexterity", "Constitution",
             "Intelligence", "Wisdom", "Charisma"
         ]
-        self.skills_map = {
+        self.skill_map = {
             "Strength": ["Saving Throw", "Athletics"],
             "Dexterity": ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
             "Constitution": ["Saving Throw"],
@@ -45,23 +54,23 @@ class CharacterModel():
             "Charisma": ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
         }
 
-        self.ability_scores: Dict[str, Ability] = {}
-        
-        for ability in self.abilities_list:
+        self.ability_scores_list: Dict[str, Ability] = {}
+
+        for ability in self.ability_list:
             # Create a dictionary of Skill objects mapped to their names
             ability_skills = {
-                skill_name: Skill() for skill_name in self.skills_map[ability]
+                skill_name: Skill() for skill_name in self.skill_map[ability]
             }
             # Assign the Ability object to the main dictionary
-            self.ability_scores[ability] = Ability(base_score=10, skills=ability_skills)
+            self.ability_scores_list[ability] = Ability(base_score=10, skills=ability_skills)
 
         if character_to_load:
             self.load_character(character_to_load)
 
-    # --- DERIVED PROPERTIES ---
+    # --- DERIVED PROPERTIES (The "Final" Values) ---
     @property
     def proficiency_bonus(self) -> int:
-        """ Proficiency Bonus derived based on character level."""
+        """ Proficiency Bonus derived on character level."""
         level = self.level
         if 1 <= level <= 4:
             return 2
@@ -74,9 +83,7 @@ class CharacterModel():
         elif 17 <= level <= 20:
             return 6
         return 0
-    
-    # --- DERIVED PROPERTIES (The "Final" Values) ---
-    
+        
     @property
     def final_speed(self) -> int:
         """Calculates final speed: Base + Modifiers"""
@@ -85,13 +92,13 @@ class CharacterModel():
 
     def get_final_ability_score(self, ability_name: str) -> int:
         # NEW: access the object attribute .base_score
-        base = self.ability_scores.get(ability_name).base_score if ability_name in self.ability_scores else 10
+        base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else 10
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == ability_name)
         return base + bonus
 
     def is_skill_proficient(self, ability_name: str, skill_name: str) -> bool:
         # NEW: access .skills and .base_proficient cleanly
-        ability = self.ability_scores.get(ability_name)
+        ability = self.ability_scores_list.get(ability_name)
         if ability and skill_name in ability.skills:
             return ability.skills[skill_name].base_proficient
         return False
@@ -124,7 +131,7 @@ class CharacterModel():
         """Helper to safely format a modifier with a + or -"""
         return f"+{mod}" if mod >= 0 else str(mod)
 
-    # --- SAVE / LOAD ---
+    # --- LOAD / SAVE / CONVERT TO DICTIONARY---
     def load_character(self, character_name):
         data = database.load_character(character_name)
         if not data:
@@ -146,12 +153,12 @@ class CharacterModel():
         
         if 'abilities' in data:
             for ab_name, ab_data in data['abilities'].items():
-                if ab_name in self.ability_scores:
-                    self.ability_scores[ab_name].base_score = ab_data.get('base_score', 10)
+                if ab_name in self.ability_scores_list:
+                    self.ability_scores_list[ab_name].base_score = ab_data.get('base_score', 10)
                     
                     for sk_name, sk_data in ab_data.get('skills', {}).items():
-                        if sk_name in self.ability_scores[ab_name].skills:
-                            self.ability_scores[ab_name].skills[sk_name].base_proficient = sk_data.get('base_proficient', False)
+                        if sk_name in self.ability_scores_list[ab_name].skills:
+                            self.ability_scores_list[ab_name].skills[sk_name].base_proficient = sk_data.get('base_proficient', False)
         return True
         
     def convert_to_dictionary(self):
@@ -168,7 +175,7 @@ class CharacterModel():
             'base_max_hp': self.base_max_hp,
             'current_hp': self.current_hp,
             'temp_hp': self.temp_hp,
-            'abilities': {k: asdict(v) for k, v in self.ability_scores.items()}
+            'abilities': {k: asdict(v) for k, v in self.ability_scores_list.items()}
         }
 
     def save_character(self):

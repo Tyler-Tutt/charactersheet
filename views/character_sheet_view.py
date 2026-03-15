@@ -69,7 +69,7 @@ class CharacterSheetView(ft.Container):
 
     def _create_ability_score_containers(self):
         containers = []
-        for ability_name in self.model.abilities_list:
+        for ability_name in self.model.ability_list:
             card = AbilityScoreContainer(
                 model=self.model,
                 ability_name=ability_name,

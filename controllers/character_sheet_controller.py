@@ -93,7 +93,7 @@ class CharacterSheetController:
         is_proficient = e.control.value
 
         # NEW: Beautiful, clean dot notation
-        self.model.ability_scores[ability_name].skills[skill_name].base_proficient = is_proficient
+        self.model.ability_scores_list[ability_name].skills[skill_name].base_proficient = is_proficient
         
         for card in self.view.ability_score_containers:
             if card.ability_name == ability_name:
@@ -105,9 +105,9 @@ class CharacterSheetController:
         Synchronizes the model when a base ability score (e.g., Strength) changes and forces updates to dependent stats like modifiers and Armor Class. 
         Ensures that a change in one stat correctly ripples through all related calculations in the view.
         '''
-        if ability_name in self.model.ability_scores:
+        if ability_name in self.model.ability_scores_list:
             # NEW: Dot notation
-            self.model.ability_scores[ability_name].base_score = new_score
+            self.model.ability_scores_list[ability_name].base_score = new_score
 
         if ability_name == "Dexterity":
             self.view.achpspeed.update_stats_data(self.model)
