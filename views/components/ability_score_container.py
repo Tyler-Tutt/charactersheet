@@ -5,6 +5,9 @@ if TYPE_CHECKING:
     from controllers.character_sheet_controller import CharacterSheetController
 
 class AbilityScoreContainer(ft.Container):
+    '''
+    A ft.Container that contains an individual Ability Score's Name, Score, Modifier, and associated Skills
+    '''
     def __init__(self, model: CharacterModel, ability_name: str, controller: 'CharacterSheetController'):
         super().__init__(
             padding=10,

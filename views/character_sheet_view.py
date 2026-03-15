@@ -3,6 +3,7 @@ from models.character_model import CharacterModel
 from views.components.ability_score_container import AbilityScoreContainer
 from views.components.character_header_container import CharacterHeaderContainer
 from views.components.ac_initiative_speed_container import AcInitiativeSpeed
+from views.components.inventory_container import InventoryContainer
 
 class CharacterSheetView(ft.Container):
     def __init__(self, model: CharacterModel, controller):
@@ -25,6 +26,7 @@ class CharacterSheetView(ft.Container):
             text_align=ft.TextAlign.CENTER,
             # weight=ft.FontWeight.BOLD,
         )
+        self.inventory_container = InventoryContainer(self.model, self.controller)
         self.second_row_container = self._create_row_2()
         
         return ft.Column(
@@ -60,7 +62,8 @@ class CharacterSheetView(ft.Container):
                     ft.Column(
                         col={"sm": 12, "md": 4},
                         controls=[
-                            ft.Text("Features & Traits")
+                            ft.Text("Features & Traits"),
+                            self.inventory_container
                             ]
                     )
                 ]
@@ -89,3 +92,4 @@ class CharacterSheetView(ft.Container):
         self.achpspeed.set_edit_mode(is_edit)
         for card in self.ability_score_containers:
             card.set_edit_mode(is_edit)
+        self.inventory_container.set_edit_mode(is_edit)

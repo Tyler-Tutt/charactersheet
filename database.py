@@ -38,8 +38,40 @@ def init_db():
                 data TEXT NOT NULL
             )
         ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS items (
+                name TEXT PRIMARY KEY,
+                data TEXT NOT NULL
+            )
+        ''')
+
+        # Insert our Test Item if it doesn't exist
+        cloak_data = {
+            "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
+            "modifiers": [
+                {"target": "ac", "value": 1, "source": "Cloak of Protection"},
+                {"target": "saving_throws", "value": 1, "source": "Cloak of Protection"}
+            ]
+        }
+        # INSERT OR IGNORE ensures we don't overwrite if it already exists
+        cursor.execute("INSERT OR IGNORE INTO items (name, data) VALUES (?, ?)", 
+                       ("Cloak of Protection", json.dumps(cloak_data)))
         
         connection.commit()
+
+def get_item_definition(item_name):
+    '''
+    Fetch an item definition from the Database.
+    Unique ID: item_name
+    '''
+    with closing(get_db_connection()) as connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT data FROM items WHERE name = ?", (item_name,))
+        row = cursor.fetchone()
+    if row:
+        return json.loads(row['data'])
+    return None
 
 def save_character(character_name, character_data):
     """
@@ -59,7 +91,9 @@ def save_character(character_name, character_data):
     print(f"Character '{character_name}' saved successfully.")
 
 def get_character_list():
-    """Fetches and returns a list of all saved character names."""
+    """
+    Fetches and returns a list of all saved character names.
+    """
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT name FROM characters ORDER BY name DESC")
@@ -69,7 +103,9 @@ def get_character_list():
     return characters
 
 def load_character(character_name):
-    """Fetches a specific character's data from the database."""
+    """
+    Fetches a specific character's data from the database.
+    """
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT data FROM characters WHERE name = ?", (character_name,))
@@ -81,7 +117,9 @@ def load_character(character_name):
     return None # Return None if no character is found
 
 def get_races():
-    """Fetches and returns a list of all race names from the database."""
+    """
+    Fetches and returns a list of all race names from the database.
+    """
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT name FROM races ORDER BY name ASC")

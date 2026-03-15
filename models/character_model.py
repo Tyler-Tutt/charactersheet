@@ -1,6 +1,13 @@
 import database
 from dataclasses import dataclass, field, asdict
-from typing import Dict
+from typing import Dict, List
+
+@dataclass
+class InventoryItem:
+    name: str
+    description: str = ""
+    is_equipped: bool = False
+    modifiers: list = field(default_factory=list)
 
 @dataclass
 class Skill:
@@ -39,6 +46,8 @@ class CharacterModel():
         # --- Future-Proofing: Modifier List ---
         # Later, you will append dicts or objects here like {"target": "speed", "value": 10, "source": "Boots of Speed"}
         self.active_modifiers = []
+        # Inventory list
+        self.inventory: List[InventoryItem] = []
 
         # --- Ability & Skill Data ---
         self.ability_list = [
@@ -91,13 +100,13 @@ class CharacterModel():
         return self.base_speed + bonus
 
     def get_final_ability_score(self, ability_name: str) -> int:
-        # NEW: access the object attribute .base_score
+        # Access the object attribute of '.base_score'
         base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else 10
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == ability_name)
         return base + bonus
 
     def is_skill_proficient(self, ability_name: str, skill_name: str) -> bool:
-        # NEW: access .skills and .base_proficient cleanly
+        # Access '.skills' and '.base_proficient' cleanly
         ability = self.ability_scores_list.get(ability_name)
         if ability and skill_name in ability.skills:
             return ability.skills[skill_name].base_proficient
@@ -111,20 +120,39 @@ class CharacterModel():
 
     @property
     def armor_class(self) -> int:
-        """Derived from FINAL Dexterity (Placeholder for armor calculation)"""
+        """
+        Derived from FINAL Dexterity (Placeholder for armor calculation)
+        """
         final_dex = self.get_final_ability_score("Dexterity")
         dex_mod = (final_dex - 10) // 2
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "ac")
         return 10 + dex_mod + bonus
 
     def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
-        """Calculates the final skill modifier using FINAL Ability Score and FINAL Proficiency."""
+        """
+        Calculates the final skill modifier using FINAL Ability Score and FINAL Proficiency.
+        """
         final_score = self.get_final_ability_score(ability_name)
-        base_mod = (final_score - 10) // 2
+        base_modifier = (final_score - 10) // 2
         
-        if self.is_skill_proficient(ability_name, skill_name):
-            return base_mod + self.proficiency_bonus
-        return base_mod
+        proficiency_bonus = self.proficiency_bonus if self.is_skill_proficient(ability_name, skill_name) else 0
+        
+        # Check active modifiers for specific skills OR all saving throws
+        item_bonus = 0
+        for mod in self.active_modifiers:
+            if mod.get("target") == skill_name:
+                item_bonus += mod.get("value", 0)
+            elif skill_name == "Saving Throw" and mod.get("target") == "saving_throws":
+                item_bonus += mod.get("value", 0)
+
+        return base_modifier + proficiency_bonus + item_bonus
+    
+    def update_active_modifiers(self):
+        """Rebuilds the active modifiers list based on equipped items."""
+        self.active_modifiers = []
+        for item in self.inventory:
+            if item.is_equipped:
+                self.active_modifiers.extend(item.modifiers)
 
     # --- HELPER METHODS ---
     def format_modifier(self, mod: int) -> str:
@@ -159,10 +187,18 @@ class CharacterModel():
                     for sk_name, sk_data in ab_data.get('skills', {}).items():
                         if sk_name in self.ability_scores_list[ab_name].skills:
                             self.ability_scores_list[ab_name].skills[sk_name].base_proficient = sk_data.get('base_proficient', False)
+        
+        self.inventory = []
+        if 'inventory' in data:
+            for item_data in data['inventory']:
+                self.inventory.append(InventoryItem(**item_data))
+                
+        self.update_active_modifiers() # Refresh modifiers after loading
+        
         return True
         
     def convert_to_dictionary(self):
-        return {
+        data = {
             'charactername': self.charactername,
             'characterclass': self.characterclass,
             'level': self.level,
@@ -175,8 +211,24 @@ class CharacterModel():
             'base_max_hp': self.base_max_hp,
             'current_hp': self.current_hp,
             'temp_hp': self.temp_hp,
-            'abilities': {k: asdict(v) for k, v in self.ability_scores_list.items()}
+            'abilities': {k: asdict(v) for k, v in self.ability_scores_list.items()},
+            'inventory': [asdict(item) for item in self.inventory]
         }
+
+        data['charactername'] = self.charactername
+        data['characterclass'] = self.characterclass
+        data['level'] = self.level
+        data['background'] = self.background
+        data['player_name'] = self.player_name
+        data['race'] = self.race
+        data['alignment'] = self.alignment
+        data['experience_points'] = self.experience_points
+        data['base_speed'] = self.base_speed
+        data['base_max_hp'] = self.base_max_hp
+        data['current_hp'] = self.current_hp
+        data['temp_hp'] = self.temp_hp
+
+        return data
 
     def save_character(self):
         if not self.charactername or self.charactername == "Character Name":

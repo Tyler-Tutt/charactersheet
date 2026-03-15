@@ -2,6 +2,7 @@ import flet as ft
 from models.character_model import CharacterModel
 from views.character_sheet_view import CharacterSheetView
 from views.load_character_modal import LoadCharacterModal
+from models.character_model import InventoryItem
 import database
 
 class CharacterSheetController:
@@ -117,6 +118,35 @@ class CharacterSheetController:
                 card.update_card_data()
                 break 
 
+    def add_item_to_inventory(self, item_name: str):
+        """Fetches item from DB and adds to model's inventory."""
+        item_data = database.get_item_definition(item_name)
+        if item_data:
+            new_item = InventoryItem(
+                name=item_name,
+                description=item_data.get("description", ""),
+                modifiers=item_data.get("modifiers", [])
+            )
+            self.model.inventory.append(new_item)
+            self.update_view_from_model()
+            self.page.open(ft.SnackBar(ft.Text(f"Added {item_name} to inventory!")))
+        else:
+            self.page.open(ft.SnackBar(ft.Text(f"Item {item_name} not found in database."), bgcolor=ft.Colors.ERROR))
+
+    def toggle_item_attunement(self, e: ft.ControlEvent):
+        """Fired when an item's 'Equipped/Attuned' checkbox is clicked."""
+        item_index = e.control.data  # We will pass the list index in the 'data' property
+        is_equipped = e.control.value
+        
+        # Update model
+        self.model.inventory[item_index].is_equipped = is_equipped
+        self.model.update_active_modifiers()
+        
+        # Update reliant UI components (AC, Saves, Skills)
+        self.view.achpspeed.update_stats_data(self.model)
+        for card in self.view.ability_score_containers:
+            card.update_card_data()
+
     def save_character(self, e):
         '''
         Directs the model to serialize its current data and persist it to the SQLite database. 
@@ -137,6 +167,10 @@ class CharacterSheetController:
 
         for card in self.view.ability_score_containers:
             card.update_card_data()
+
+        # Update the inventory view if it exists
+        if hasattr(self.view, 'inventory_container'):
+            self.view.inventory_container.update_inventory_ui()
 
     def open_load_modal(self, e):
         '''
