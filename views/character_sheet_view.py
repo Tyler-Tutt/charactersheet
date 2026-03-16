@@ -57,7 +57,9 @@ class CharacterSheetView(ft.Container):
                         col={"sm": 12, "md": 4},
                         controls=[self.proficiency_bonus_field, *self.ability_score_containers]
                     ),
-                    ft.Column(col={"sm": 12, "md": 4}, controls=[self.achpspeed]),
+                    ft.Column(
+                        col={"sm": 12, "md": 4},
+                        controls=[self.achpspeed]),
                     ft.Column(
                         col={"sm": 12, "md": 4},
                         controls=[ft.Text("Features & Traits"), self.inventory_container]
@@ -69,6 +71,6 @@ class CharacterSheetView(ft.Container):
     def _create_ability_score_containers(self):
         containers = []
         for ability_name in self.model.ability_list:
-            card = AbilityScoreContainer(model=self.model, ability_name=ability_name)
-            containers.append(card)
+            container = AbilityScoreContainer(model=self.model, ability_name=ability_name)
+            containers.append(container)
         return containers

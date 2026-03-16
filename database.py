@@ -105,13 +105,13 @@ def get_character_list():
 
 def load_character(character_name):
     """
-    Fetches a specific character's data from the database.
+    Fetches a specific character's data from the database and returns it as a Python Dictionary
     """
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT data FROM characters WHERE name = ?", (character_name,))
         row = cursor.fetchone()
-        
+
     if row:
         # Parse the JSON string and return it as a Python dictionary
         return json.loads(row['data'])
@@ -134,7 +134,6 @@ class UserPreferences:
     def __init__(self, username):
         self.username = username
         # Load or create the user on initialization. 
-        # Notice we no longer save a permanent connection to self.connection!
         self.preferences = self._load_or_create_user()
 
     def _load_or_create_user(self):

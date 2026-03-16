@@ -2,16 +2,6 @@ import database
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
 
-@dataclass
-class InventoryItem:
-    '''
-    Represents an individual item within a character's inventory
-    '''
-    name: str
-    description: str = ""
-    short_description: str = ""
-    is_equipped: bool = False
-    modifiers: list = field(default_factory=list)
 
 @dataclass
 class Skill:
@@ -27,6 +17,17 @@ class Ability:
     '''
     base_score: int = 10
     skills: Dict[str, Skill] = field(default_factory=dict)
+
+@dataclass
+class InventoryItem:
+    '''
+    Represents an individual item within a character's inventory
+    '''
+    name: str
+    description: str = ""
+    short_description: str = ""
+    is_equipped: bool = False
+    modifiers: list = field(default_factory=list)
 
 class CharacterModel():
     '''
@@ -47,8 +48,7 @@ class CharacterModel():
         self.current_hp = 10
         self.temp_hp = 0
 
-        # --- Future-Proofing: Modifier List ---
-        # Later, you will append dicts or objects here like {"target": "speed", "value": 10, "source": "Boots of Speed"}
+        # --- Modifier List ---
         self.active_modifiers = []
         # Inventory list
         self.inventory: List[InventoryItem] = []
@@ -69,8 +69,8 @@ class CharacterModel():
 
         self.ability_scores_list: Dict[str, Ability] = {}
 
+        # Create a dictionary of Skill objects mapped to their names
         for ability in self.ability_list:
-            # Create a dictionary of Skill objects mapped to their names
             ability_skills = {
                 skill_name: Skill() for skill_name in self.skill_map[ability]
             }
@@ -165,36 +165,36 @@ class CharacterModel():
 
     # --- LOAD / SAVE / CONVERT TO DICTIONARY---
     def load_character(self, character_name):
-        data = database.load_character(character_name)
-        if not data:
+        character_data = database.load_character(character_name)
+        if not character_data:
             print(f"Load Error: Could not find data for {character_name}.")
-            return False    
+            return False
 
-        self.charactername = data.get('charactername', "Unknown")
-        self.characterclass = data.get('characterclass', "Class")
-        self.level = data.get('level', 1)
-        self.background = data.get('background', "Background")
-        self.player_name = data.get('player_name', "Player Name")
-        self.race = data.get('race', "Race")
-        self.alignment = data.get('alignment', "Alignment")
-        self.experience_points = data.get('experience_points', 0)
-        self.base_speed = data.get('base_speed', 30)
-        self.base_max_hp = data.get('base_max_hp', 10)
-        self.current_hp = data.get('current_hp', 10)
-        self.temp_hp = data.get('temp_hp', 0)
+        self.charactername = character_data.get('charactername', "Unknown")
+        self.characterclass = character_data.get('characterclass', "Class")
+        self.level = character_data.get('level', 1)
+        self.background = character_data.get('background', "Background")
+        self.player_name = character_data.get('player_name', "Player Name")
+        self.race = character_data.get('race', "Race")
+        self.alignment = character_data.get('alignment', "Alignment")
+        self.experience_points = character_data.get('experience_points', 0)
+        self.base_speed = character_data.get('base_speed', 30)
+        self.base_max_hp = character_data.get('base_max_hp', 10)
+        self.current_hp = character_data.get('current_hp', 10)
+        self.temp_hp = character_data.get('temp_hp', 0)
         
-        if 'abilities' in data:
-            for ab_name, ab_data in data['abilities'].items():
-                if ab_name in self.ability_scores_list:
-                    self.ability_scores_list[ab_name].base_score = ab_data.get('base_score', 10)
+        if 'abilities' in character_data:
+            for ability_name, ability_data in character_data['abilities'].items():
+                if ability_name in self.ability_scores_list:
+                    self.ability_scores_list[ability_name].base_score = ability_data.get('base_score', 10)
                     
-                    for sk_name, sk_data in ab_data.get('skills', {}).items():
-                        if sk_name in self.ability_scores_list[ab_name].skills:
-                            self.ability_scores_list[ab_name].skills[sk_name].base_proficient = sk_data.get('base_proficient', False)
+                    for skill_name, skill_data in ability_data.get('skills', {}).items():
+                        if skill_name in self.ability_scores_list[ability_name].skills:
+                            self.ability_scores_list[ability_name].skills[skill_name].base_proficient = skill_data.get('base_proficient', False)
         
         self.inventory = []
-        if 'inventory' in data:
-            for item_data in data['inventory']:
+        if 'inventory' in character_data:
+            for item_data in character_data['inventory']:
                 self.inventory.append(InventoryItem(**item_data))
                 
         self.update_active_modifiers() # Refresh modifiers after loading
