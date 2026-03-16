@@ -12,7 +12,7 @@ def main(page: ft.Page):
     # The controller handles creating the model and the view
     app_controller = CharacterSheetController(page)
 
-    # --- Menu / AppBar ---
+    # --- AppBar ---
     page.appbar = ft.AppBar(
         title=ft.Text("Flet Character Sheet"),
         actions=[

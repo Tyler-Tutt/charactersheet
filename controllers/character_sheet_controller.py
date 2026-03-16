@@ -22,9 +22,6 @@ class CharacterSheetController:
         self.view = CharacterSheetView(model=self.model)
         self.page.pubsub.subscribe_topic("ui_action", self.handle_ui_action)
 
-        # Removed the self.view.set_edit_mode call here! 
-        # The components naturally start in view mode on mount.
-
     def toggle_edit_mode(self, e):
         '''
         Switches the application between read-only and interactive states by updating the is_edit_mode flag. 
