@@ -36,7 +36,7 @@ class AcInitiativeSpeed(ft.Container):
         })
 
     # --- Data Updaters ---
-    def update_stats_data(self, message=None):
+    def update_stats_data(self, topic=None, message=None):
         self.armor_class.value = str(self.model.armor_class)
         self.initiative.value = f"+{self.model.initiative}" if self.model.initiative >= 0 else str(self.model.initiative)
         # Update speed only if not in edit mode so we don't overwrite user typing
@@ -44,7 +44,7 @@ class AcInitiativeSpeed(ft.Container):
             self.speed.value = str(self.model.final_speed)
         self.update()
 
-    def set_edit_mode(self, is_edit: bool):
+    def set_edit_mode(self, topic=None, is_edit: bool = False):
         self.speed.read_only = not is_edit
         self.speed.value = str(self.model.base_speed) if is_edit else str(self.model.final_speed)
         self.update()

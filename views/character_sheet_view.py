@@ -19,7 +19,7 @@ class CharacterSheetView(ft.Container):
     def will_unmount(self):
         self.page.pubsub.unsubscribe_topic("model_updated", self.handle_model_update)
 
-    def handle_model_update(self, message):
+    def handle_model_update(self, topic, message):
         """Updates components living strictly in this root view."""
         self.proficiency_bonus_field.value = self.model.format_modifier(self.model.proficiency_bonus)
         self.proficiency_bonus_field.update()

@@ -22,7 +22,8 @@ class CharacterSheetController:
         self.view = CharacterSheetView(model=self.model)
         self.page.pubsub.subscribe_topic("ui_action", self.handle_ui_action)
 
-        self.view.set_edit_mode(self.is_edit_mode)
+        # Removed the self.view.set_edit_mode call here! 
+        # The components naturally start in view mode on mount.
 
     def toggle_edit_mode(self, e):
         '''
@@ -47,14 +48,11 @@ class CharacterSheetController:
     def get_view(self):
         '''
         Getter method that returns the top-level CharacterSheetView component managed by the controller. 
-        Allows the main entry point of the app to easily add the entire character sheet to the page
         '''
         return self.view
 
-    # --- Event Handlers ---
-
     # --- The Central Action Hub ---
-    def handle_ui_action(self, message: dict):
+    def handle_ui_action(self, topic: str, message: dict):
         """Listens for actions broadcasted by UI components, updates model, and triggers a UI refresh."""
         action = message.get("action")
 
@@ -91,7 +89,7 @@ class CharacterSheetController:
                 new_item = InventoryItem(
                     name=item_name,
                     description=item_data.get("description", ""),
-                    short_description=item_data.get("short_description", ""), # TYPO FIXED!
+                    short_description=item_data.get("short_description", ""), 
                     modifiers=item_data.get("modifiers", [])
                 )
                 self.model.inventory.append(new_item)
@@ -107,129 +105,19 @@ class CharacterSheetController:
         # The Magic Step: Tell the entire app that the model has changed!
         self.page.pubsub.send_all_on_topic("model_updated", "update")
 
-    def handle_header_change(self, e: ft.ControlEvent):
-        '''
-        Updates the character model when general information fields, such as "Level" or "Race," are modified in the UI. 
-        Includes basic type validation to ensure numeric fields remain valid integers before triggering dependent UI refreshes.
-        '''
-        attr_name = e.control.data
-        new_value = e.control.value
-        old_value = getattr(self.model, attr_name, None)
-        
-        # Type validation
-        if attr_name in ['level', 'experience_points', 'speed', 'max_hp', 'current_hp', 'temp_hp']:
-            try:
-                new_value = int(new_value)
-            except (ValueError, TypeError):
-                new_value = old_value 
-                e.control.value = str(old_value) 
-        
-        setattr(self.model, attr_name, new_value)
-
-        if attr_name == 'speed':
-            self.model.base_speed = new_value
-        else:
-            setattr(self.model, attr_name, new_value)
-
-        if attr_name == 'level':
-            self.view.update_proficiency_bonus()
-            
-            for card in self.view.ability_score_containers:
-                card.update_card_data()
-
-    def handle_skill_proficiency_change(self, e: ft.ControlEvent):
-        '''
-        Responds to users toggling skill proficiency checkboxes by updating the specific skill's status within the data model. 
-        Optimizes performance by instructing only the relevant ability score container to redraw its UI.
-        '''
-        ability_name = e.control.data["ability"]
-        skill_name = e.control.data["skill"]
-        is_proficient = e.control.value
-
-        # NEW: Beautiful, clean dot notation
-        self.model.ability_scores_list[ability_name].skills[skill_name].base_proficient = is_proficient
-        
-        for card in self.view.ability_score_containers:
-            if card.ability_name == ability_name:
-                card.update_card_data()
-                break
-
-    def handle_ability_score_change(self, ability_name: str, new_score: int):
-        '''
-        Synchronizes the model when a base ability score (e.g., Strength) changes and forces updates to dependent stats like modifiers and Armor Class. 
-        Ensures that a change in one stat correctly ripples through all related calculations in the view.
-        '''
-        if ability_name in self.model.ability_scores_list:
-            # NEW: Dot notation
-            self.model.ability_scores_list[ability_name].base_score = new_score
-
-        if ability_name == "Dexterity":
-            self.view.achpspeed.update_stats_data(self.model)
-            
-        for card in self.view.ability_score_containers:
-            if card.ability_name == ability_name:
-                card.update_card_data()
-                break 
-
-    def add_item_to_inventory(self, item_name: str):
-        """Fetches item from DB and adds a copy to model's inventory."""
-        item_data = database.get_item_definition(item_name)
-        if item_data:
-            new_item = InventoryItem(
-                name=item_name,
-                description=item_data.get("description", ""),
-                short_description=item_data.get("short_description",""),
-                modifiers=item_data.get("modifiers", [])
-            )
-            self.model.inventory.append(new_item)
-            self.update_view_from_model()
-            self.page.open(ft.SnackBar(ft.Text(f"Added {item_name} to inventory!")))
-        else:
-            self.page.open(ft.SnackBar(ft.Text(f"Item {item_name} not found in database."), bgcolor=ft.Colors.ERROR))
-
-    def toggle_item_attunement(self, e: ft.ControlEvent):
-        """Fired when an item's 'Equipped/Attuned' checkbox is clicked."""
-        item_index = e.control.data  # We will pass the list index in the 'data' property
-        is_equipped = e.control.value
-        
-        # Update model
-        self.model.inventory[item_index].is_equipped = is_equipped
-        self.model.update_active_modifiers()
-        
-        # Update reliant UI components (AC, Saves, Skills)
-        self.view.achpspeed.update_stats_data(self.model)
-        for card in self.view.ability_score_containers:
-            card.update_card_data()
-
+    # --- External Save/Load ---
     def save_character(self, e):
         '''
         Directs the model to serialize its current data and persist it to the SQLite database. 
-        Displays a success or error message to the user based on whether the character name was valid and the save operation succeeded.
         '''
         if self.model.save_character():
             self.page.open(ft.SnackBar(ft.Text(f"Saved {self.model.charactername}!"), bgcolor=ft.Colors.GREEN_700))
         else:
             self.page.open(ft.SnackBar(ft.Text("Save failed. Check character name."), bgcolor=ft.Colors.ERROR))
 
-    def update_view_from_model(self):
-        '''
-        Utility function that forces every major component in the view to refresh its data from the current model state. 
-        Primarily used after a new character is loaded to ensure the UI displays the correct information.
-        '''
-        self.view.header.update_header_data(self.model)
-        self.view.achpspeed.update_stats_data(self.model)
-
-        for card in self.view.ability_score_containers:
-            card.update_card_data()
-
-        # Update the inventory view if it exists
-        if hasattr(self.view, 'inventory_container'):
-            self.view.inventory_container.update_inventory_ui()
-
     def open_load_modal(self, e):
         '''
         Retrieves the list of saved characters from the database and presents them in a selection dialog. 
-        Manages the logic for confirming a load operation, updating the UI with the selected character's data, or canceling the request.
         '''
         character_list = database.get_character_list()
 

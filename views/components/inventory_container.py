@@ -48,7 +48,7 @@ class InventoryContainer(ft.Container):
         })
 
     # --- Data Updaters ---
-    def update_inventory_ui(self, message=None):
+    def update_inventory_ui(self, topic=None, message=None):
         self.item_list_column.controls.clear()
         
         for index, item in enumerate(self.model.inventory):
@@ -67,8 +67,13 @@ class InventoryContainer(ft.Container):
             )
             self.item_list_column.controls.append(item_row)
             
-        self.update()
+        # THE FIX: Check if the component is mounted before updating
+        if self.page:
+            self.update()
             
-    def set_edit_mode(self, is_edit: bool):
+    def set_edit_mode(self, topic=None, is_edit: bool = False):
         self.add_test_item_btn.visible = is_edit
-        self.update()
+        
+        # THE FIX: Apply the safety check here too
+        if self.page:
+            self.update()

@@ -96,7 +96,7 @@ class AbilityScoreContainer(ft.Container):
         })
 
     # --- Data Updaters ---
-    def update_card_data(self, message=None):
+    def update_card_data(self, topic=None, message=None):
         is_edit = not self.score_field.read_only
         score = self.model.ability_scores_list[self.ability_name].base_score if is_edit else self.model.get_final_ability_score(self.ability_name)
             
@@ -112,7 +112,7 @@ class AbilityScoreContainer(ft.Container):
         
         self.update()
 
-    def set_edit_mode(self, is_edit: bool):
+    def set_edit_mode(self, topic=None, is_edit: bool = False):
         self.score_field.read_only = not is_edit
         self.score_field.value = str(self.model.ability_scores_list[self.ability_name].base_score) if is_edit else str(self.model.get_final_ability_score(self.ability_name))
 

@@ -49,7 +49,7 @@ class CharacterHeaderContainer(ft.Container):
         })
 
     # --- Data Updaters ---
-    def update_header_data(self, message=None):
+    def update_header_data(self, topic=None, message=None):
         self.charactername_field.value = self.model.charactername
         self.class_field.value = self.model.characterclass
         
@@ -63,7 +63,7 @@ class CharacterHeaderContainer(ft.Container):
         self.alignment_field.value = self.model.alignment
         self.update()
 
-    def set_edit_mode(self, is_edit: bool):
+    def set_edit_mode(self, topic=None, is_edit: bool = False):
         read_only_state = not is_edit 
         self.charactername_field.read_only = read_only_state
         self.class_field.read_only = read_only_state
