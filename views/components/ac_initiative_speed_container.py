@@ -18,6 +18,9 @@ class AcInitiativeSpeed(ft.Container):
 
         self.content = ft.ResponsiveRow(controls=[self.armor_class, self.initiative, self.speed])
 
+        # Initialize the component in View Mode
+        self.set_edit_mode(is_edit=False)
+
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
         self.page.pubsub.subscribe_topic("model_updated", self.update_stats_data)
@@ -42,9 +45,11 @@ class AcInitiativeSpeed(ft.Container):
         # Update speed only if not in edit mode so we don't overwrite user typing
         if self.speed.read_only:
             self.speed.value = str(self.model.final_speed)
-        self.update()
+        if self.page:
+            self.update()
 
     def set_edit_mode(self, topic=None, is_edit: bool = False):
         self.speed.read_only = not is_edit
         self.speed.value = str(self.model.base_speed) if is_edit else str(self.model.final_speed)
-        self.update()
+        if self.page:
+            self.update()

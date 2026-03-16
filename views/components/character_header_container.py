@@ -31,6 +31,9 @@ class CharacterHeaderContainer(ft.Container):
             ]
         )
 
+        # Initialize the component in View Mode
+        self.set_edit_mode(is_edit=False)
+
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
         self.page.pubsub.subscribe_topic("model_updated", self.update_header_data)
@@ -61,7 +64,10 @@ class CharacterHeaderContainer(ft.Container):
         self.player_name_field.value = self.model.player_name
         self.race_field.value = self.model.race
         self.alignment_field.value = self.model.alignment
-        self.update()
+
+        # SAFETY CHECK
+        if self.page:
+            self.update()
 
     def set_edit_mode(self, topic=None, is_edit: bool = False):
         read_only_state = not is_edit 
@@ -73,4 +79,5 @@ class CharacterHeaderContainer(ft.Container):
         self.race_field.read_only = read_only_state
         self.alignment_field.read_only = read_only_state
         self.experience_points_field.read_only = read_only_state
-        self.update()
+        if self.page:
+            self.update()

@@ -62,6 +62,9 @@ class AbilityScoreContainer(ft.Container):
             ]
         )
 
+        # Initialize the component in View Mode
+        self.set_edit_mode(is_edit=False)
+
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
         self.page.pubsub.subscribe_topic("model_updated", self.update_card_data)
@@ -110,7 +113,8 @@ class AbilityScoreContainer(ft.Container):
             skill_name = checkbox.data["skill"]
             checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
         
-        self.update()
+        if self.page:
+            self.update()
 
     def set_edit_mode(self, topic=None, is_edit: bool = False):
         self.score_field.read_only = not is_edit
@@ -121,4 +125,5 @@ class AbilityScoreContainer(ft.Container):
             skill_name = checkbox.data["skill"]
             checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
 
-        self.update()
+        if self.page:
+            self.update()

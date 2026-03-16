@@ -27,6 +27,9 @@ class InventoryContainer(ft.Container):
         )
         self.update_inventory_ui()
 
+        # Initialize the component in View Mode
+        self.set_edit_mode(is_edit=False)
+
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
         self.page.pubsub.subscribe_topic("model_updated", self.update_inventory_ui)
