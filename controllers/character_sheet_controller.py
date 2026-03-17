@@ -104,13 +104,13 @@ class CharacterSheetController:
 
     # --- External Save/Load ---
     def save_character(self, e):
-        '''
-        Directs the model to serialize its current data and persist it to the SQLite database. 
-        '''
-        if self.model.save_character():
-            self.page.open(ft.SnackBar(ft.Text(f"Saved {self.model.charactername}!"), bgcolor=ft.Colors.GREEN_700))
-        else:
+        if not self.model.charactername or self.model.charactername == "Character Name":
             self.page.open(ft.SnackBar(ft.Text("Save failed. Check character name."), bgcolor=ft.Colors.ERROR))
+            return
+
+        character_data = self.model.to_dict()
+        database.save_character(self.model.charactername, character_data)
+        self.page.open(ft.SnackBar(ft.Text(f"Saved {self.model.charactername}!"), bgcolor=ft.Colors.GREEN_700))
 
     def open_load_modal(self, e):
         '''
@@ -119,8 +119,8 @@ class CharacterSheetController:
         character_list = database.get_character_list()
 
         def handle_load(char_to_load):
-            if self.model.load_character(char_to_load):
-                # Broadcast the model update so views refresh!
+            char_data = database.load_character(char_to_load)
+            if char_data and self.model.load_from_dict(char_data):
                 self.page.pubsub.send_all_on_topic("model_updated", "load")
                 self.page.close(modal) 
                 self.page.open(ft.SnackBar(ft.Text(f"Loaded {char_to_load}!"))) 
