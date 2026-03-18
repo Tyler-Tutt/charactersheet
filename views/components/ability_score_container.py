@@ -36,7 +36,7 @@ class AbilityScoreContainer(ft.Container):
             self.skill_modifier_fields[skill_name] = mod_field
             
             prof_checkbox = ft.Checkbox(
-                value=skill_info.base_proficient, 
+                value=skill_info.base_proficiency, 
                 data={"ability": self.ability_name, "skill": skill_name},
                 on_change=self._on_proficiency_change,
                 col={"sm": 2, "md": 2}
@@ -111,7 +111,7 @@ class AbilityScoreContainer(ft.Container):
             
         for checkbox in self.skill_checkboxes:
             skill_name = checkbox.data["skill"]
-            checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
+            checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficiency if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
         
         if self.page:
             self.update()
@@ -123,7 +123,7 @@ class AbilityScoreContainer(ft.Container):
         for checkbox in self.skill_checkboxes:
             checkbox.disabled = not is_edit
             skill_name = checkbox.data["skill"]
-            checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficient if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
+            checkbox.value = self.model.ability_scores_list[self.ability_name].skills[skill_name].base_proficiency if is_edit else self.model.is_skill_proficient(self.ability_name, skill_name)
 
         if self.page:
             self.update()

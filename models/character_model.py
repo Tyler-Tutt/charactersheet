@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
+import constants as c  # Import our new constants file
 
 @dataclass
 class Skill:
@@ -9,7 +10,7 @@ class Skill:
 @dataclass
 class Ability:
     """Represents an individual character Ability Score (Strength, Charisma, etc.)"""
-    base_score: int = 10
+    base_score: int = c.BASE_ABILITY_SCORE
     skills: Dict[str, Skill] = field(default_factory=dict)
 
 @dataclass
@@ -34,9 +35,9 @@ class CharacterModel:
     race: str = "Race"
     alignment: str = "Alignment"
     experience_points: int = 0
-    base_speed: int = 30
-    base_max_hp: int = 10
-    current_hp: int = 10
+    base_speed: int = c.DEFAULT_SPEED
+    base_max_hp: int = c.DEFAULT_MAX_HP
+    current_hp: int = c.DEFAULT_MAX_HP
     temp_hp: int = 0
 
     # --- Modifier List ---
@@ -46,35 +47,27 @@ class CharacterModel:
     inventory: List[InventoryItem] = field(default_factory=list)
 
     # --- Ability & Skill Data ---
-    ability_list: list = field(default_factory=lambda: [
-        "Strength", "Dexterity", "Constitution",
-        "Intelligence", "Wisdom", "Charisma"
-    ])
+    # Fetch directly from constants instead of hardcoding
+    ability_list: list = field(default_factory=lambda: c.ABILITIES.copy())
     
     ability_scores_list: Dict[str, Ability] = field(default_factory=dict)
 
     def __post_init__(self):
         """Initializes the complex nested ability/skill dictionaries if not provided."""
         if not self.ability_scores_list:
-            skill_map = {
-                "Strength": ["Saving Throw", "Athletics"],
-                "Dexterity": ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
-                "Constitution": ["Saving Throw"],
-                "Intelligence": ["Saving Throw", "Arcana", "History", "Investigation", "Nature", "Religion"],
-                "Wisdom": ["Saving Throw", "Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
-                "Charisma": ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
-            }
-            
-            for ability, skills in skill_map.items():
+            # We no longer need the massive dictionary definition here!
+            for ability, skills in c.SKILL_MAPPING.items():
                 ability_skills = {skill_name: Skill() for skill_name in skills}
-                self.ability_scores_list[ability] = Ability(base_score=10, skills=ability_skills)
+                self.ability_scores_list[ability] = Ability(
+                    base_score=c.BASE_ABILITY_SCORE, 
+                    skills=ability_skills
+                )
 
     # --- DERIVED PROPERTIES (The "Final" Values) ---
     @property
     def proficiency_bonus(self) -> int:
         """ Proficiency Bonus derived from character level."""
-        # 5e math shortcut: PB = 2 + ((Level - 1) // 4)
-        return 2 + ((self.level - 1) // 4)
+        return c.PROFICIENCY_BASE + ((self.level - 1) // c.PROFICIENCY_LEVEL_DIVISOR)
         
     @property
     def final_speed(self) -> int:
@@ -83,7 +76,7 @@ class CharacterModel:
         return self.base_speed + bonus
 
     def get_final_ability_score(self, ability_name: str) -> int:
-        base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else 10
+        base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else c.BASE_ABILITY_SCORE
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == ability_name)
         return base + bonus
 
@@ -97,20 +90,20 @@ class CharacterModel:
     def initiative(self) -> int:
         """Derived from FINAL Dexterity"""
         final_dex = self.get_final_ability_score("Dexterity")
-        return (final_dex - 10) // 2
+        return (final_dex - c.BASE_ABILITY_SCORE) // c.ABILITY_MODIFIER_DIVISOR
 
     @property
     def armor_class(self) -> int:
         """Derived from FINAL Dexterity and AC Modifiers"""
         final_dex = self.get_final_ability_score("Dexterity")
-        dex_mod = (final_dex - 10) // 2
+        dex_mod = (final_dex - c.BASE_ABILITY_SCORE) // c.ABILITY_MODIFIER_DIVISOR
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "ac")
-        return 10 + dex_mod + bonus
+        return c.BASE_AC + dex_mod + bonus
 
     def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
         """Calculates the final skill modifier using FINAL Ability Score and FINAL Proficiency."""
         final_score = self.get_final_ability_score(ability_name)
-        base_modifier = (final_score - 10) // 2
+        base_modifier = (final_score - c.BASE_ABILITY_SCORE) // c.ABILITY_MODIFIER_DIVISOR
         
         proficiency_bonus = self.proficiency_bonus if self.is_skill_proficient(ability_name, skill_name) else 0
         
@@ -126,7 +119,6 @@ class CharacterModel:
     
     def update_active_modifiers(self):
         """Rebuilds the active modifiers list based on equipped items."""
-        # Condensed using Python List Comprehensions
         self.active_modifiers = [mod for item in self.inventory if item.is_equipped for mod in item.modifiers]
 
     # --- HELPER METHODS ---
@@ -155,7 +147,7 @@ class CharacterModel:
         if 'abilities' in character_data:
             for ability_name, ability_data in character_data['abilities'].items():
                 if ability_name in self.ability_scores_list:
-                    self.ability_scores_list[ability_name].base_score = ability_data.get('base_score', 10)
+                    self.ability_scores_list[ability_name].base_score = ability_data.get('base_score', c.BASE_ABILITY_SCORE)
                     
                     for skill_name, skill_data in ability_data.get('skills', {}).items():
                         if skill_name in self.ability_scores_list[ability_name].skills:

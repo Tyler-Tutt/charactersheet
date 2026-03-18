@@ -72,7 +72,7 @@ class CharacterSheetController:
         elif action == "toggle_proficiency":
             ability_name = message["ability"]
             skill_name = message["skill"]
-            self.model.ability_scores_list[ability_name].skills[skill_name].base_proficient = message["is_proficient"]
+            self.model.ability_scores_list[ability_name].skills[skill_name].base_proficiency = message["is_proficient"]
 
         elif action == "update_ability":
             ability_name = message["ability"]
