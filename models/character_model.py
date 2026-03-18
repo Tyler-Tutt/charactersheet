@@ -135,11 +135,11 @@ class CharacterModel:
         return f"+{mod}" if mod >= 0 else str(mod)
 
     # --- SERIALIZATION / DESERIALIZATION ---
-    def to_dict(self) -> dict:
+    def to_dictionary(self) -> dict:
         """Built-in standard for converting the dataclass to a JSON-ready dict."""
         return asdict(self)
         
-    def load_from_dict(self, character_data: dict):
+    def load_from_dictionary(self, character_data: dict):
         """Updates the instance data in-place from a loaded dictionary."""
         if not character_data:
             return False

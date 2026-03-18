@@ -108,7 +108,7 @@ class CharacterSheetController:
             self.page.open(ft.SnackBar(ft.Text("Save failed. Check character name."), bgcolor=ft.Colors.ERROR))
             return
 
-        character_data = self.model.to_dict()
+        character_data = self.model.to_dictionary()
         database.save_character(self.model.charactername, character_data)
         self.page.open(ft.SnackBar(ft.Text(f"Saved {self.model.charactername}!"), bgcolor=ft.Colors.GREEN_700))
 
@@ -120,7 +120,7 @@ class CharacterSheetController:
 
         def handle_load(char_to_load):
             char_data = database.load_character(char_to_load)
-            if char_data and self.model.load_from_dict(char_data):
+            if char_data and self.model.load_from_dictionary(char_data):
                 self.page.pubsub.send_all_on_topic("model_updated", "load")
                 self.page.close(modal) 
                 self.page.open(ft.SnackBar(ft.Text(f"Loaded {char_to_load}!"))) 
