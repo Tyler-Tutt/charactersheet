@@ -1,4 +1,3 @@
-# constants.py
 from typing import Final
 
 # --- 5e Core Rules ---
@@ -13,13 +12,13 @@ DEFAULT_MAX_HP: Final[int] = 10
 PROFICIENCY_BASE: Final[int] = 2
 PROFICIENCY_LEVEL_DIVISOR: Final[int] = 4
 
-# --- Categorical Domain Data ---
+# --- Character Abilities ---
 ABILITIES: Final[list[str]] = [
     "Strength", "Dexterity", "Constitution",
     "Intelligence", "Wisdom", "Charisma"
 ]
-
-SKILL_MAPPING: Final[dict[str, list[str]]] = {
+# --- Character Skills ---
+SKILLS: Final[dict[str, list[str]]] = {
     "Strength": ["Saving Throw", "Athletics"],
     "Dexterity": ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
     "Constitution": ["Saving Throw"],

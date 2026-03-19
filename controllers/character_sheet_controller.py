@@ -20,7 +20,7 @@ class CharacterSheetController:
         self.is_edit_mode = False
         
         self.view = CharacterSheetView(model=self.model)
-        self.page.pubsub.subscribe_topic("ui_action", self.handle_ui_action)
+        self.page.pubsub.subscribe_topic("ui_action", self.handle_subscribe_topic_ui_action)
 
     def toggle_edit_mode(self, e):
         '''
@@ -49,7 +49,7 @@ class CharacterSheetController:
         return self.view
 
     # --- The Central Action Hub ---
-    def handle_ui_action(self, topic: str, message: dict):
+    def handle_subscribe_topic_ui_action(self, topic: str, message: dict):
         """Listens for actions broadcasted by UI components, updates model, and triggers a UI refresh."""
         action = message.get("action")
 
