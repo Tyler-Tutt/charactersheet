@@ -81,7 +81,7 @@ class CharacterSheetController:
 
         elif action == "add_item":
             item_name = message["item_name"]
-            item_data = database.get_item_definition(item_name)
+            item_data = database.fetch_item(item_name)
             if item_data:
                 new_item = InventoryItem(
                     name=item_name,
@@ -108,7 +108,7 @@ class CharacterSheetController:
             self.page.open(ft.SnackBar(ft.Text("Save failed. Check character name."), bgcolor=ft.Colors.ERROR))
             return
 
-        character_data = self.model.to_dictionary()
+        character_data = self.model.convert_to_dictionary()
         database.save_character(self.model.charactername, character_data)
         self.page.open(ft.SnackBar(ft.Text(f"Saved {self.model.charactername}!"), bgcolor=ft.Colors.GREEN_700))
 
@@ -116,10 +116,10 @@ class CharacterSheetController:
         '''
         Retrieves the list of saved characters from the database and presents them in a selection dialog. 
         '''
-        character_list = database.get_character_list()
+        character_list = database.fetch_character_list()
 
         def handle_load(char_to_load):
-            char_data = database.load_character(char_to_load)
+            char_data = database.fetch_character(char_to_load)
             if char_data and self.model.load_from_dictionary(char_data):
                 self.page.pubsub.send_all_on_topic("model_updated", "load")
                 self.page.close(modal) 

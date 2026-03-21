@@ -14,10 +14,9 @@ def get_db_connection():
 
 def init_db():
     """
-    Initializes the database and creates the necessary tables if they
-    do not already exist.
+    Initializes the database and creates the necessary tables if they do not already exist.
     """
-    # using closing() guarantees connection.close() is called when the block ends
+    # closing() guarantees connection.close() is called when the block ends
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         
@@ -61,7 +60,7 @@ def init_db():
         
         connection.commit()
 
-def get_item_definition(item_name):
+def fetch_item(item_name):
     '''
     Fetch an item definition from the Database.
     Unique ID: item_name
@@ -91,7 +90,7 @@ def save_character(character_name, character_data):
         connection.commit()
     print(f"Character '{character_name}' saved successfully.")
 
-def get_character_list():
+def fetch_character_list():
     """
     Fetches and returns a list of all saved character names.
     """
@@ -103,7 +102,7 @@ def get_character_list():
         
     return characters
 
-def load_character(character_name):
+def fetch_character(character_name):
     """
     Fetches a specific character's data from the database and returns it as a Python Dictionary
     """
@@ -117,7 +116,7 @@ def load_character(character_name):
         return json.loads(row['data'])
     return None # Return None if no character is found
 
-def get_races():
+def fetch_races():
     """
     Fetches and returns a list of all race names from the database.
     """
@@ -131,6 +130,9 @@ def get_races():
     return races
 
 class UserPreferences:
+    """
+    Creates a User Record
+    """
     def __init__(self, username):
         self.username = username
         # Load or create the user on initialization. 

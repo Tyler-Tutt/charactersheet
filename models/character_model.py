@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
-import constants as constant  # Import our new constants file
+import constants as constant
 
 @dataclass
 class Skill:
@@ -24,7 +24,7 @@ class InventoryItem:
 
 @dataclass
 class CharacterModel:
-    """Represents the pure data and domain logic of a Character"""
+    """Represents the current data and score-logic of a Character"""
     
     # --- Core Attributes ---
     charactername: str = "Character Name"
@@ -99,9 +99,17 @@ class CharacterModel:
         dex_mod = (final_dex - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
         bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "ac")
         return constant.BASE_AC + dex_mod + bonus
+    
+    @property
+    def carrying_capacity(self) -> int:
+        """Strength score * 15 + any active modifiers."""
+        final_str = self.get_final_ability_score("Strength")
+        base_capacity = final_str * 15
+        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "carrying_capacity")
+        return base_capacity + bonus
 
     def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
-        """Calculates the final skill modifier using FINAL Ability Score and FINAL Proficiency."""
+        """Ability Score Modifier + Proficiency."""
         final_score = self.get_final_ability_score(ability_name)
         base_modifier = (final_score - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
         
@@ -127,7 +135,7 @@ class CharacterModel:
         return f"+{mod}" if mod >= 0 else str(mod)
 
     # --- SERIALIZATION / DESERIALIZATION ---
-    def to_dictionary(self) -> dict:
+    def convert_to_dictionary(self) -> dict:
         """Built-in standard for converting the dataclass to a JSON-ready dict."""
         return asdict(self)
         
