@@ -14,13 +14,26 @@ class Ability:
     skills: Dict[str, Skill] = field(default_factory=dict)
 
 @dataclass
+class Modifier:
+    """A strict schema for any stat-altering buff or debuff."""
+    target: str   # Eventually, this should be an Enum! (e.g., StatType.AC)
+    value: int
+    source: str
+
+@dataclass
 class InventoryItem:
     """Represents an individual item within a character's inventory"""
     name: str
     description: str = ""
     short_description: str = ""
     is_equipped: bool = False
-    modifiers: list = field(default_factory=list)
+    modifiers: list[Modifier] = field(default_factory=list)
+
+    def __post_init__(self):
+        """Automatically convert raw dictionaries from the DB into Modifier objects."""
+        # When loaded from JSON, modifiers might be dictionaries convert them
+        if self.modifiers and isinstance(self.modifiers[0], dict):
+            self.modifiers = [Modifier(**mod_dict) for mod_dict in self.modifiers]
 
 @dataclass
 class CharacterModel:
@@ -72,12 +85,12 @@ class CharacterModel:
     @property
     def final_speed(self) -> int:
         """Calculates final speed: Base + Modifiers"""
-        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "speed")
+        bonus = sum(mod.value for mod in self.active_modifiers if mod.target == "speed")
         return self.base_speed + bonus
 
     def get_final_ability_score(self, ability_name: str) -> int:
         base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else constant.BASE_ABILITY_SCORE
-        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == ability_name)
+        bonus = sum(mod.value for mod in self.active_modifiers if mod.target == ability_name)
         return base + bonus
 
     def is_skill_proficient(self, ability_name: str, skill_name: str) -> bool:
@@ -97,7 +110,7 @@ class CharacterModel:
         """Derived from FINAL Dexterity and AC Modifiers"""
         final_dex = self.get_final_ability_score("Dexterity")
         dex_mod = (final_dex - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
-        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "ac")
+        bonus = sum(mod.value for mod in self.active_modifiers if mod.target =="ac")
         return constant.BASE_AC + dex_mod + bonus
     
     @property
@@ -105,7 +118,7 @@ class CharacterModel:
         """Strength score * 15 + any active modifiers."""
         final_str = self.get_final_ability_score("Strength")
         base_capacity = final_str * 15
-        bonus = sum(mod.get("value", 0) for mod in self.active_modifiers if mod.get("target") == "carrying_capacity")
+        bonus = sum(mod.value for mod in self.active_modifiers if mod.target == "carrying_capacity")
         return base_capacity + bonus
 
     def get_skill_modifier(self, ability_name: str, skill_name: str) -> int:
@@ -118,10 +131,10 @@ class CharacterModel:
         # Check active modifiers for specific skills OR all saving throws
         item_bonus = 0
         for mod in self.active_modifiers:
-            if mod.get("target") == skill_name:
-                item_bonus += mod.get("value", 0)
-            elif skill_name == "Saving Throw" and mod.get("target") == "saving_throws":
-                item_bonus += mod.get("value", 0)
+            if mod.target == skill_name:
+                item_bonus += mod.value
+            elif skill_name == "Saving Throw" and mod.target == "saving_throws":
+                item_bonus += mod.value
 
         return base_modifier + proficiency_bonus + item_bonus
     

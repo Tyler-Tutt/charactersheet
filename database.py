@@ -20,8 +20,8 @@ def init_db():
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
         
-        # Create a 'users' table.
-        # The 'preferences' column will store a JSON string.
+        # Create 'users' table.
+        # 'preferences' column stores a JSON string.
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +45,7 @@ def init_db():
             )
         ''')
 
-        # Insert our Test Item if it doesn't exist
+        # Insert Test Item if it doesn't exist
         cloak_data = {
             "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
             "short_description": "+1 AC | +1 to all Saving Throws",
