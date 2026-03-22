@@ -1,39 +1,8 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
 import constants as constant
-
-@dataclass
-class Skill:
-    """Represents an individual character skill (Stealth, Arcana, Perception, etc.)"""
-    base_proficiency: bool = False
-
-@dataclass
-class Ability:
-    """Represents an individual character Ability Score (Strength, Charisma, etc.)"""
-    base_score: int = constant.BASE_ABILITY_SCORE
-    skills: Dict[str, Skill] = field(default_factory=dict)
-
-@dataclass
-class Modifier:
-    """A strict schema for any stat-altering buff or debuff."""
-    target: str   # Eventually, this should be an Enum! (e.g., StatType.AC)
-    value: int
-    source: str
-
-@dataclass
-class InventoryItem:
-    """Represents an individual item within a character's inventory"""
-    name: str
-    description: str = ""
-    short_description: str = ""
-    is_equipped: bool = False
-    modifiers: list[Modifier] = field(default_factory=list)
-
-    def __post_init__(self):
-        """Automatically convert raw dictionaries from the DB into Modifier objects."""
-        # When loaded from JSON, modifiers might be dictionaries convert them
-        if self.modifiers and isinstance(self.modifiers[0], dict):
-            self.modifiers = [Modifier(**mod_dict) for mod_dict in self.modifiers]
+from models.items import InventoryItem, Modifier
+from models.stats import Ability, Skill
 
 @dataclass
 class CharacterModel:

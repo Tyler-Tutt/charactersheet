@@ -1,8 +1,8 @@
 import flet as ft
-from models.character_model import CharacterModel
+from models.character import CharacterModel
+from models.items import InventoryItem
 from views.character_sheet_view import CharacterSheetView
 from views.load_character_modal import LoadCharacterModal
-from models.character_model import InventoryItem
 import database
 
 class CharacterSheetController:

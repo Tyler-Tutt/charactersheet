@@ -1,5 +1,5 @@
 import flet as ft
-from models.character_model import CharacterModel
+from models.character import CharacterModel
 from views.components.ability_score_container import AbilityScoreContainer
 from views.components.character_header_container import CharacterHeaderContainer
 from views.components.ac_initiative_speed_container import AcInitiativeSpeed

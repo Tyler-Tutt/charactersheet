@@ -1,5 +1,5 @@
 import flet as ft
-from models.character_model import CharacterModel
+from models.character import CharacterModel
 
 class AbilityScoreContainer(ft.Container):
     def __init__(self, model: CharacterModel, ability_name: str):
