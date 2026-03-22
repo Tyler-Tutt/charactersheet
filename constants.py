@@ -1,4 +1,5 @@
 from typing import Final
+from enum import Enum
 
 # --- 5e Core Rules ---
 BASE_AC: Final[int] = 10
@@ -26,3 +27,8 @@ SKILLS: Final[dict[str, list[str]]] = {
     "Wisdom": ["Saving Throw", "Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
     "Charisma": ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
 }
+
+class Topic(str, Enum):
+    UI_ACTION = "ui_action"
+    MODEL_UPDATED = "model_updated"
+    EDIT_MODE_CHANGED = "edit_mode_changed"

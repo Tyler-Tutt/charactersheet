@@ -1,9 +1,9 @@
 import flet as ft
-from models.character import CharacterModel
-from models.items import InventoryItem
+from models import CharacterModel, InventoryItem
 from views.character_sheet_view import CharacterSheetView
 from views.load_character_modal import LoadCharacterModal
 import database
+from constants import Topic
 
 class CharacterSheetController:
     '''
@@ -20,7 +20,7 @@ class CharacterSheetController:
         self.is_edit_mode = False
         
         self.view = CharacterSheetView(model=self.model)
-        self.page.pubsub.subscribe_topic("ui_action", self.handle_subscribe_topic_ui_action)
+        self.page.pubsub.subscribe_topic(Topic.UI_ACTION, self.handle_subscribe_topic_ui_action)
 
     def toggle_edit_mode(self, e):
         '''
@@ -30,7 +30,7 @@ class CharacterSheetController:
         self.is_edit_mode = not self.is_edit_mode
 
         # Broadcast the edit mode change globally
-        self.page.pubsub.send_all_on_topic("edit_mode_changed", self.is_edit_mode)
+        self.page.pubsub.send_all_on_topic(Topic.EDIT_MODE_CHANGED, self.is_edit_mode)
         
         e.control.icon = ft.Icons.EDIT if self.is_edit_mode else ft.Icons.EDIT_OFF
         e.control.tooltip = "Switch to View Mode" if self.is_edit_mode else "Switch to Edit Mode"
@@ -100,7 +100,7 @@ class CharacterSheetController:
             self.model.update_active_modifiers()
 
         # The Magic Step: Tell the entire app that the model has changed!
-        self.page.pubsub.send_all_on_topic("model_updated", "update")
+        self.page.pubsub.send_all_on_topic(Topic.MODEL_UPDATED, "update")
 
     # --- External Save/Load ---
     def save_character(self, e):
@@ -121,7 +121,7 @@ class CharacterSheetController:
         def handle_load(char_to_load):
             char_data = database.fetch_character(char_to_load)
             if char_data and self.model.load_from_dictionary(char_data):
-                self.page.pubsub.send_all_on_topic("model_updated", "load")
+                self.page.pubsub.send_all_on_topic(Topic.MODEL_UPDATED, "load")
                 self.page.close(modal) 
                 self.page.open(ft.SnackBar(ft.Text(f"Loaded {char_to_load}!"))) 
             else:

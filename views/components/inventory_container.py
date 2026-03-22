@@ -1,5 +1,6 @@
 import flet as ft
-from models.character import CharacterModel
+from models import CharacterModel
+from constants import Topic
 
 class InventoryContainer(ft.Container):
     def __init__(self, model: CharacterModel):
@@ -32,19 +33,19 @@ class InventoryContainer(ft.Container):
 
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
-        self.page.pubsub.subscribe_topic("model_updated", self.update_inventory_ui)
-        self.page.pubsub.subscribe_topic("edit_mode_changed", self.set_edit_mode)
+        self.page.pubsub.subscribe_topic(Topic.MODEL_UPDATED, self.update_inventory_ui)
+        self.page.pubsub.subscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     def will_unmount(self):
-        self.page.pubsub.unsubscribe_topic("model_updated", self.update_inventory_ui)
-        self.page.pubsub.unsubscribe_topic("edit_mode_changed", self.set_edit_mode)
+        self.page.pubsub.unsubscribe_topic(Topic.MODEL_UPDATED, self.update_inventory_ui)
+        self.page.pubsub.unsubscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     # --- Action Publishers ---
     def _add_test_item(self, e):
-        e.page.pubsub.send_all_on_topic("ui_action", {"action": "add_item", "item_name": "Cloak of Protection"})
+        e.page.pubsub.send_all_on_topic(Topic.UI_ACTION, {"action": "add_item", "item_name": "Cloak of Protection"})
 
     def _on_attunement_change(self, e):
-        e.page.pubsub.send_all_on_topic("ui_action", {
+        e.page.pubsub.send_all_on_topic(Topic.UI_ACTION, {
             "action": "toggle_attunement",
             "index": e.control.data,
             "is_equipped": e.control.value

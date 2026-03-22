@@ -16,7 +16,7 @@ class InventoryItem:
     description: str = ""
     short_description: str = ""
     is_equipped: bool = False
-    modifiers: list[Modifier] = field(default_factory=list)
+    modifiers: List[Modifier] = field(default_factory=list)
 
     def __post_init__(self):
         """Automatically convert raw dictionaries from the DB into Modifier objects."""

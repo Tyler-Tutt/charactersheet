@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
 import constants as constant
-from models.items import InventoryItem, Modifier
-from models.stats import Ability, Skill
+from .items import InventoryItem
+from .stats import Ability, Skill
 
 @dataclass
 class CharacterModel:

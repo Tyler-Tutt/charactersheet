@@ -1,5 +1,6 @@
 import flet as ft
-from models.character import CharacterModel
+from models import CharacterModel
+from constants import Topic
 
 class AbilityScoreContainer(ft.Container):
     def __init__(self, model: CharacterModel, ability_name: str):
@@ -67,12 +68,12 @@ class AbilityScoreContainer(ft.Container):
 
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
-        self.page.pubsub.subscribe_topic("model_updated", self.update_card_data)
-        self.page.pubsub.subscribe_topic("edit_mode_changed", self.set_edit_mode)
+        self.page.pubsub.subscribe_topic(Topic.MODEL_UPDATED, self.update_card_data)
+        self.page.pubsub.subscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     def will_unmount(self):
-        self.page.pubsub.unsubscribe_topic("model_updated", self.update_card_data)
-        self.page.pubsub.unsubscribe_topic("edit_mode_changed", self.set_edit_mode)
+        self.page.pubsub.unsubscribe_topic(Topic.MODEL_UPDATED, self.update_card_data)
+        self.page.pubsub.unsubscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     # --- Action Publishers ---
     def _on_score_change(self, e: ft.ControlEvent):
@@ -84,7 +85,7 @@ class AbilityScoreContainer(ft.Container):
             self.score_field.value = str(new_score)
             self.score_field.update()
 
-        e.page.pubsub.send_all_on_topic("ui_action", {
+        e.page.pubsub.send_all_on_topic(Topic.UI_ACTION, {
             "action": "update_ability",
             "ability": self.ability_name,
             "score": new_score

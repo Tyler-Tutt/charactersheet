@@ -1,9 +1,7 @@
 import flet as ft
-from models.character import CharacterModel
-from views.components.ability_score_container import AbilityScoreContainer
-from views.components.character_header_container import CharacterHeaderContainer
-from views.components.ac_initiative_speed_container import AcInitiativeSpeed
-from views.components.inventory_container import InventoryContainer
+from models import CharacterModel
+from components import AbilityScoreContainer, CharacterHeaderContainer, AcInitiativeSpeed, InventoryContainer
+from constants import Topic
 
 class CharacterSheetView(ft.Container):
     def __init__(self, model: CharacterModel):
@@ -14,10 +12,10 @@ class CharacterSheetView(ft.Container):
 
     # --- Flet Lifecycle Methods for Pub/Sub ---
     def did_mount(self):
-        self.page.pubsub.subscribe_topic("model_updated", self.handle_model_update)
+        self.page.pubsub.subscribe_topic(Topic.MODEL_UPDATED, self.handle_model_update)
 
     def will_unmount(self):
-        self.page.pubsub.unsubscribe_topic("model_updated", self.handle_model_update)
+        self.page.pubsub.unsubscribe_topic(Topic.MODEL_UPDATED, self.handle_model_update)
 
     def handle_model_update(self, topic, message):
         """Updates components living strictly in this root view."""
