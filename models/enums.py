@@ -1,6 +1,6 @@
 from enum import Enum
 
-class StatType(str, Enum):
+class StatType(str, Enum): # Multiple Inheritance (Mixin)
     # Core Abilities
     STRENGTH = "strength"
     DEXTERITY = "dexterity"
@@ -36,7 +36,7 @@ class StatType(str, Enum):
     PERFORMANCE = "performance"
     PERSUASION = "persuasion"
 
-class ModifierType(str, Enum):
+class ModifierType(str, Enum): # Multiple Inheritance (Mixin)
     BONUS = "bonus"         
     OVERRIDE = "override"   
     MULTIPLIER = "multiplier" 

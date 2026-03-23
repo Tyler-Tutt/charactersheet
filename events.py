@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Topic(str, Enum):
+class PubSubTopic(str, Enum):
     """Event channels used for Flet's Pub/Sub system."""
     UI_ACTION = "ui_action"
     MODEL_UPDATED = "model_updated"

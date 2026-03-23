@@ -1,6 +1,6 @@
 import flet as ft
 from models import CharacterModel
-from events import Topic
+from events import PubSubTopic
 
 class CharacterHeaderContainer(ft.Container):
     def __init__(self, model: CharacterModel):
@@ -37,16 +37,16 @@ class CharacterHeaderContainer(ft.Container):
 
     # --- Pub/Sub Subscriptions ---
     def did_mount(self):
-        self.page.pubsub.subscribe_topic(Topic.MODEL_UPDATED, self.update_header_data)
-        self.page.pubsub.subscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
+        self.page.pubsub.subscribe_topic(PubSubTopic.MODEL_UPDATED, self.update_header_data)
+        self.page.pubsub.subscribe_topic(PubSubTopic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     def will_unmount(self):
-        self.page.pubsub.unsubscribe_topic(Topic.MODEL_UPDATED, self.update_header_data)
-        self.page.pubsub.unsubscribe_topic(Topic.EDIT_MODE_CHANGED, self.set_edit_mode)
+        self.page.pubsub.unsubscribe_topic(PubSubTopic.MODEL_UPDATED, self.update_header_data)
+        self.page.pubsub.unsubscribe_topic(PubSubTopic.EDIT_MODE_CHANGED, self.set_edit_mode)
 
     # --- Action Publishers ---
     def _on_header_change(self, e):
-        e.page.pubsub.send_all_on_topic(Topic.UI_ACTION, {
+        e.page.pubsub.send_all_on_topic(PubSubTopic.UI_ACTION, {
             "action": "update_header",
             "attr": e.control.data,
             "value": e.control.value

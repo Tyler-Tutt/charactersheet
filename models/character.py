@@ -44,9 +44,7 @@ class CharacterModel:
                     skills=ability_skills
                 )
 
-    # ==========================================
     # --- THE MODIFIER ENGINE ---
-    # ==========================================
     def update_active_modifiers(self):
         """Rebuilds the active modifiers list based on equipped items, active spells, etc."""
         self.active_modifiers.clear()
@@ -63,7 +61,7 @@ class CharacterModel:
 
     def calculate_stat(self, target_stat: StatType, base_value: int | float) -> int:
         """
-        The Universal Engine. 
+        The Universal Stat Calculation Engine. 
         Order of Operations: Base -> Override -> Bonus -> Multiplier
         """
         # 1. Filter for the specific stat we are calculating
@@ -88,10 +86,7 @@ class CharacterModel:
         # Return as an integer (D&D generally rounds down)
         return int(final_value)
 
-
-    # ==========================================
     # --- DERIVED PROPERTIES (Using the Engine) ---
-    # ==========================================
     @property
     def proficiency_bonus(self) -> int:
         return rules.PROFICIENCY_BASE + ((self.level - 1) // rules.PROFICIENCY_LEVEL_DIVISOR)
@@ -101,7 +96,6 @@ class CharacterModel:
         return self.calculate_stat(StatType.SPEED, self.base_speed)
 
     def get_final_ability_score(self, ability_name: StatType) -> int:
-        # We pass the Enum straight into the engine!
         base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else rules.BASE_ABILITY_SCORE
         return self.calculate_stat(ability_name, base)
 
