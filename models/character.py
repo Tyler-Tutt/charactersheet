@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List
-import constants as constant
+import rules_5e as rules
 from .items import InventoryItem
 from .stats import Ability, Skill
 from .enums import StatType, ModifierType
-from .modifiers import EffectModifier
+from .effectmodifiers import EffectModifier
 
 @dataclass
 class CharacterModel:
@@ -19,29 +19,28 @@ class CharacterModel:
     race: str = "Race"
     alignment: str = "Alignment"
     experience_points: int = 0
-    base_speed: int = constant.DEFAULT_SPEED
-    base_max_hp: int = constant.DEFAULT_MAX_HP
-    current_hp: int = constant.DEFAULT_MAX_HP
+    base_speed: int = rules.DEFAULT_SPEED
+    base_max_hp: int = rules.DEFAULT_MAX_HP
+    current_hp: int = rules.DEFAULT_MAX_HP
     temp_hp: int = 0
 
     # --- Modifier List ---
-    # Type hinting updated to our new universal class
     active_modifiers: List[EffectModifier] = field(default_factory=list)
     
     # --- Inventory ---
     inventory: List[InventoryItem] = field(default_factory=list)
 
     # --- Ability & Skill Data ---
-    ability_list: list = field(default_factory=lambda: constant.ABILITIES.copy())
+    ability_list: list = field(default_factory=lambda: rules.ABILITIES.copy())
     ability_scores_list: Dict[str, Ability] = field(default_factory=dict)
 
     def __post_init__(self):
         """Initializes the complex nested ability/skill dictionaries if not provided."""
         if not self.ability_scores_list:
-            for ability, skills in constant.SKILLS.items():
+            for ability, skills in rules.SKILLS.items():
                 ability_skills = {skill_name: Skill() for skill_name in skills}
                 self.ability_scores_list[ability] = Ability(
-                    base_score=constant.BASE_ABILITY_SCORE, 
+                    base_score=rules.BASE_ABILITY_SCORE, 
                     skills=ability_skills
                 )
 
@@ -95,7 +94,7 @@ class CharacterModel:
     # ==========================================
     @property
     def proficiency_bonus(self) -> int:
-        return constant.PROFICIENCY_BASE + ((self.level - 1) // constant.PROFICIENCY_LEVEL_DIVISOR)
+        return rules.PROFICIENCY_BASE + ((self.level - 1) // rules.PROFICIENCY_LEVEL_DIVISOR)
         
     @property
     def final_speed(self) -> int:
@@ -103,22 +102,22 @@ class CharacterModel:
 
     def get_final_ability_score(self, ability_name: StatType) -> int:
         # We pass the Enum straight into the engine!
-        base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else constant.BASE_ABILITY_SCORE
+        base = self.ability_scores_list.get(ability_name).base_score if ability_name in self.ability_scores_list else rules.BASE_ABILITY_SCORE
         return self.calculate_stat(ability_name, base)
 
     @property
     def initiative(self) -> int:
         """Derived from FINAL Dexterity + any Initiative specific modifiers."""
         final_dex = self.get_final_ability_score("Dexterity")
-        dex_mod = (final_dex - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
+        dex_mod = (final_dex - rules.BASE_ABILITY_SCORE) // rules.ABILITY_MODIFIER_DIVISOR
         return self.calculate_stat(StatType.INITIATIVE, dex_mod)
 
     @property
     def armor_class(self) -> int:
         """Derived from 10 + FINAL Dexterity mod + any AC specific modifiers."""
         final_dex = self.get_final_ability_score("Dexterity")
-        dex_mod = (final_dex - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
-        base_ac = constant.BASE_AC + dex_mod
+        dex_mod = (final_dex - rules.BASE_ABILITY_SCORE) // rules.ABILITY_MODIFIER_DIVISOR
+        base_ac = rules.BASE_AC + dex_mod
         
         return self.calculate_stat(StatType.AC, base_ac)
 
@@ -131,7 +130,7 @@ class CharacterModel:
 
     def get_skill_modifier(self, ability_name: StatType, skill_name: StatType) -> int:
         final_score = self.get_final_ability_score(ability_name)
-        base_modifier = (final_score - constant.BASE_ABILITY_SCORE) // constant.ABILITY_MODIFIER_DIVISOR
+        base_modifier = (final_score - rules.BASE_ABILITY_SCORE) // rules.ABILITY_MODIFIER_DIVISOR
         proficiency_bonus = self.proficiency_bonus if self.is_skill_proficient(ability_name, skill_name) else 0
         
         base_skill_value = base_modifier + proficiency_bonus
@@ -166,7 +165,7 @@ class CharacterModel:
                 ability_enum = StatType(ability_str)
                 
                 if ability_enum in self.ability_scores_list:
-                    self.ability_scores_list[ability_enum].base_score = ability_data.get('base_score', constant.BASE_ABILITY_SCORE)
+                    self.ability_scores_list[ability_enum].base_score = ability_data.get('base_score', rules.BASE_ABILITY_SCORE)
                     
                     for skill_str, skill_data in ability_data.get('skills', {}).items():
                         # Directly cast the skill JSON string back into our StatType Enum

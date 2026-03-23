@@ -1,7 +1,7 @@
 import flet as ft
 from models import CharacterModel
 from views.components import AbilityScoreContainer, CharacterHeaderContainer, AcInitiativeSpeed, InventoryContainer
-from constants import Topic
+from events import Topic
 
 class CharacterSheetView(ft.Container):
     def __init__(self, model: CharacterModel):

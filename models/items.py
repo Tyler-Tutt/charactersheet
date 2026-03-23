@@ -1,6 +1,5 @@
-# models/items.py
 from dataclasses import dataclass, field
-from .modifiers import EffectModifier
+from .effectmodifiers import EffectModifier
 from typing import List
 
 @dataclass

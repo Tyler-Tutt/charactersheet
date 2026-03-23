@@ -1,7 +1,7 @@
 from .character import CharacterModel
 from .items import InventoryItem
 from .stats import Ability, Skill
-from .modifiers import EffectModifier
+from .effectmodifiers import EffectModifier
 from .enums import StatType, ModifierType
 
 __all__ = [

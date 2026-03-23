@@ -27,8 +27,3 @@ SKILLS: Final[Dict[StatType, List[StatType]]] = {
     StatType.WISDOM: [StatType.SAVING_THROWS, StatType.ANIMAL_HANDLING, StatType.INSIGHT, StatType.MEDICINE, StatType.PERCEPTION, StatType.SURVIVAL],
     StatType.CHARISMA: [StatType.SAVING_THROWS, StatType.DECEPTION, StatType.INTIMIDATION, StatType.PERFORMANCE, StatType.PERSUASION]
 }
-
-class Topic(str, Enum):
-    UI_ACTION = "ui_action"
-    MODEL_UPDATED = "model_updated"
-    EDIT_MODE_CHANGED = "edit_mode_changed"

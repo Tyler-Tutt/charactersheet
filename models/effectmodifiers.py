@@ -4,7 +4,7 @@ from .enums import StatType, ModifierType
 
 @dataclass
 class EffectModifier:
-    """The universal standard for altering a character's state."""
+    """Standardized class for altering a character's state."""
     target: StatType
     mod_type: ModifierType
     value: Any

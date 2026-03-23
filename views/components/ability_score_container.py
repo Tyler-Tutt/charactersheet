@@ -1,7 +1,7 @@
 import flet as ft
 from models import CharacterModel
 from models.enums import StatType
-from constants import Topic
+from events import Topic
 
 class AbilityScoreContainer(ft.Container):
     def __init__(self, model: CharacterModel, ability_name: StatType):

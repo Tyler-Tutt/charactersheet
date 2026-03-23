@@ -3,7 +3,7 @@ from models import CharacterModel, InventoryItem
 from views.character_sheet_view import CharacterSheetView
 from views.load_character_modal import LoadCharacterModal
 import database
-from constants import Topic
+from events import Topic
 
 class CharacterSheetController:
     '''

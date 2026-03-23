@@ -1,6 +1,6 @@
 import flet as ft
 from models import CharacterModel
-from constants import Topic
+from events import Topic
 
 class CharacterHeaderContainer(ft.Container):
     def __init__(self, model: CharacterModel):
