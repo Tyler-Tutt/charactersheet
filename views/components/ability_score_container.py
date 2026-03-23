@@ -1,9 +1,10 @@
 import flet as ft
 from models import CharacterModel
+from models.enums import StatType
 from constants import Topic
 
 class AbilityScoreContainer(ft.Container):
-    def __init__(self, model: CharacterModel, ability_name: str):
+    def __init__(self, model: CharacterModel, ability_name: StatType):
         super().__init__(
             padding=10,
             bgcolor=ft.Colors.LIGHT_GREEN,
@@ -15,8 +16,11 @@ class AbilityScoreContainer(ft.Container):
         self.skill_modifier_fields = {}
         self.skill_checkboxes = [] 
         
+        # Format the Enum cleanly for the UI display (e.g., "strength" -> "Strength")
+        display_name = ability_name.value.replace("_", " ").title()
+        
         initial_score = self.model.ability_scores_list[ability_name].base_score
-        self.ability_name_text = ft.Text(ability_name.upper(), size=16, weight=ft.FontWeight.BOLD)
+        self.ability_name_text = ft.Text(display_name.upper(), size=16, weight=ft.FontWeight.BOLD)
         self.modifier_text = ft.Text(self.model.format_modifier((initial_score - 10) // 2), size=20)
         self.score_field = ft.TextField(
             value=str(initial_score),
@@ -44,10 +48,13 @@ class AbilityScoreContainer(ft.Container):
             )
             self.skill_checkboxes.append(prof_checkbox) 
             
+            # Format the skill Enum cleanly for the UI display
+            skill_display = skill_name.value.replace("_", " ").title()
+            
             self.skills_controls.append(
                 ft.ResponsiveRow(
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                    controls=[prof_checkbox, mod_field, ft.Text(skill_name, selectable=True, col={"sm": 7, "md": 7})]
+                    controls=[prof_checkbox, mod_field, ft.Text(skill_display, selectable=True, col={"sm": 7, "md": 7})]
                 )
             )
             
@@ -63,7 +70,6 @@ class AbilityScoreContainer(ft.Container):
             ]
         )
 
-        # Initialize the component in View Mode
         self.set_edit_mode(is_edit=False)
 
     # --- Pub/Sub Subscriptions ---

@@ -9,7 +9,7 @@ __all__ = [
     "InventoryItem",
     "Ability",
     "Skill",
-    "EffectModifier"
+    "EffectModifier",
     "StatType",
     "ModifierType"
 ]

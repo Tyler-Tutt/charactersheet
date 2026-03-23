@@ -1,23 +1,44 @@
-from enum import Enum, auto
+from enum import Enum
 
 class StatType(str, Enum):
-    # Core Stats
+    # Core Abilities
     STRENGTH = "strength"
     DEXTERITY = "dexterity"
     CONSTITUTION = "constitution"
+    INTELLIGENCE = "intelligence"
+    WISDOM = "wisdom"
+    CHARISMA = "charisma"
+
     # Combat
     AC = "ac"
     SPEED = "speed"
     INITIATIVE = "initiative"
     MAX_HP = "max_hp"
-    # Skills/Saves
+
+    # Skills & Saves
     SAVING_THROWS = "saving_throws"
+    ATHLETICS = "athletics"
+    ACROBATICS = "acrobatics"
+    SLEIGHT_OF_HAND = "sleight_of_hand"
     STEALTH = "stealth"
-    # Add all other skills/targets here...
+    ARCANA = "arcana"
+    HISTORY = "history"
+    INVESTIGATION = "investigation"
+    NATURE = "nature"
+    RELIGION = "religion"
+    ANIMAL_HANDLING = "animal_handling"
+    INSIGHT = "insight"
+    MEDICINE = "medicine"
+    PERCEPTION = "perception"
+    SURVIVAL = "survival"
+    DECEPTION = "deception"
+    INTIMIDATION = "intimidation"
+    PERFORMANCE = "performance"
+    PERSUASION = "persuasion"
 
 class ModifierType(str, Enum):
-    BONUS = "bonus"         # Additive (+1, -2)
-    OVERRIDE = "override"   # Sets a stat to a specific number (e.g., Gauntlets of Ogre Power)
-    MULTIPLIER = "multiplier" # e.g., double carrying capacity
-    ADVANTAGE = "advantage"   # Boolean logic
+    BONUS = "bonus"         
+    OVERRIDE = "override"   
+    MULTIPLIER = "multiplier" 
+    ADVANTAGE = "advantage"   
     DISADVANTAGE = "disadvantage"

@@ -50,10 +50,21 @@ def init_db():
             "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
             "short_description": "+1 AC | +1 to all Saving Throws",
             "modifiers": [
-                {"target": "ac", "value": 1, "source": "Cloak of Protection"},
-                {"target": "saving_throws", "value": 1, "source": "Cloak of Protection"}
+                {
+                    "target": "ac", 
+                    "mod_type": "bonus", 
+                    "value": 1, 
+                    "source_name": "Cloak of Protection"
+                },
+                {
+                    "target": "saving_throws", 
+                    "mod_type": "bonus", 
+                    "value": 1, 
+                    "source_name": "Cloak of Protection"
+                }
             ]
         }
+
         # INSERT OR IGNORE ensures we don't overwrite if it already exists
         cursor.execute("INSERT OR REPLACE INTO items (name, data) VALUES (?, ?)", 
                        ("Cloak of Protection", json.dumps(cloak_data)))

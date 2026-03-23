@@ -1,6 +1,6 @@
 import flet as ft
 from models import CharacterModel
-from components import AbilityScoreContainer, CharacterHeaderContainer, AcInitiativeSpeed, InventoryContainer
+from views.components import AbilityScoreContainer, CharacterHeaderContainer, AcInitiativeSpeed, InventoryContainer
 from constants import Topic
 
 class CharacterSheetView(ft.Container):

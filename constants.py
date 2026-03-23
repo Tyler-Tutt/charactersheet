@@ -1,5 +1,6 @@
-from typing import Final
+from typing import Final, Dict, List
 from enum import Enum
+from models.enums import StatType
 
 # --- 5e Core Rules ---
 BASE_AC: Final[int] = 10
@@ -9,23 +10,22 @@ ABILITY_MODIFIER_DIVISOR: Final[int] = 2
 DEFAULT_SPEED: Final[int] = 30
 DEFAULT_MAX_HP: Final[int] = 10
 
-# Proficiency Bonus Math: 2 + ((Level - 1) // 4)
 PROFICIENCY_BASE: Final[int] = 2
 PROFICIENCY_LEVEL_DIVISOR: Final[int] = 4
 
-# --- Character Abilities ---
-ABILITIES: Final[list[str]] = [
-    "Strength", "Dexterity", "Constitution",
-    "Intelligence", "Wisdom", "Charisma"
+# --- Character Abilities & Skills (NOW FULLY TYPE-SAFE) ---
+ABILITIES: Final[List[StatType]] = [
+    StatType.STRENGTH, StatType.DEXTERITY, StatType.CONSTITUTION,
+    StatType.INTELLIGENCE, StatType.WISDOM, StatType.CHARISMA
 ]
-# --- Character Skills ---
-SKILLS: Final[dict[str, list[str]]] = {
-    "Strength": ["Saving Throw", "Athletics"],
-    "Dexterity": ["Saving Throw", "Acrobatics", "Sleight of Hand", "Stealth"],
-    "Constitution": ["Saving Throw"],
-    "Intelligence": ["Saving Throw", "Arcana", "History", "Investigation", "Nature", "Religion"],
-    "Wisdom": ["Saving Throw", "Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
-    "Charisma": ["Saving Throw", "Deception", "Intimidation", "Performance", "Persuasion"]
+
+SKILLS: Final[Dict[StatType, List[StatType]]] = {
+    StatType.STRENGTH: [StatType.SAVING_THROWS, StatType.ATHLETICS],
+    StatType.DEXTERITY: [StatType.SAVING_THROWS, StatType.ACROBATICS, StatType.SLEIGHT_OF_HAND, StatType.STEALTH],
+    StatType.CONSTITUTION: [StatType.SAVING_THROWS],
+    StatType.INTELLIGENCE: [StatType.SAVING_THROWS, StatType.ARCANA, StatType.HISTORY, StatType.INVESTIGATION, StatType.NATURE, StatType.RELIGION],
+    StatType.WISDOM: [StatType.SAVING_THROWS, StatType.ANIMAL_HANDLING, StatType.INSIGHT, StatType.MEDICINE, StatType.PERCEPTION, StatType.SURVIVAL],
+    StatType.CHARISMA: [StatType.SAVING_THROWS, StatType.DECEPTION, StatType.INTIMIDATION, StatType.PERFORMANCE, StatType.PERSUASION]
 }
 
 class Topic(str, Enum):
