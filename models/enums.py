@@ -1,7 +1,8 @@
 from enum import Enum
 
-class StatType(str, Enum): # Multiple Inheritance (Mixin)
-    # Core Abilities
+# Multiple Inheritance (Strung Enum: Mixin). Used because of JSON library
+class StatType(str, Enum):
+    # Abilities
     STRENGTH = "strength"
     DEXTERITY = "dexterity"
     CONSTITUTION = "constitution"
@@ -15,7 +16,7 @@ class StatType(str, Enum): # Multiple Inheritance (Mixin)
     INITIATIVE = "initiative"
     MAX_HP = "max_hp"
 
-    # Skills & Saves
+    # Skills & Saving Throw
     SAVING_THROWS = "saving_throws"
     ATHLETICS = "athletics"
     ACROBATICS = "acrobatics"
@@ -36,9 +37,10 @@ class StatType(str, Enum): # Multiple Inheritance (Mixin)
     PERFORMANCE = "performance"
     PERSUASION = "persuasion"
 
-class ModifierType(str, Enum): # Multiple Inheritance (Mixin)
+# Multiple Inheritance (String Enum: Mixin)
+class ModifierType(str, Enum):
     BONUS = "bonus"         
     OVERRIDE = "override"   
     MULTIPLIER = "multiplier" 
-    ADVANTAGE = "advantage"   
+    ADVANTAGE = "advantage"
     DISADVANTAGE = "disadvantage"

@@ -82,9 +82,13 @@ class CharacterSheetController:
         elif action == "add_item":
             item_name = message["item_name"]
             item_data = database.fetch_item(item_name)
+            
             if item_data:
                 new_item = InventoryItem(
-                    name=item_name,
+                    name=item_data.get("name", item_name),
+                    category=item_data.get("category", "Gear"),
+                    rarity=item_data.get("rarity", "Common"),
+                    requires_attunement=item_data.get("requires_attunement", False),
                     description=item_data.get("description", ""),
                     short_description=item_data.get("short_description", ""), 
                     modifiers=item_data.get("modifiers", [])

@@ -5,10 +5,10 @@ from .enums import StatType, ModifierType
 @dataclass
 class EffectModifier:
     """Standardized class for altering a character's state."""
+    source_name: str
     target: StatType
     mod_type: ModifierType
     value: Any
-    source_name: str
     duration: int = -1
 
     def __post_init__(self):

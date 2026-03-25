@@ -38,50 +38,58 @@ def init_db():
             )
         ''')
 
+        # 1. Build Hybrid Items Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS items (
-                name TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                category TEXT NOT NULL,
+                rarity TEXT NOT NULL,
+                requires_attunement BOOLEAN,
                 data TEXT NOT NULL
             )
         ''')
 
-        # Insert Test Item if it doesn't exist
+        # 2. Extract the static metadata out of the JSON blob
         cloak_data = {
             "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
             "short_description": "+1 AC | +1 to all Saving Throws",
             "modifiers": [
-                {
-                    "target": "ac", 
-                    "mod_type": "bonus", 
-                    "value": 1, 
-                    "source_name": "Cloak of Protection"
-                },
-                {
-                    "target": "saving_throws", 
-                    "mod_type": "bonus", 
-                    "value": 1, 
-                    "source_name": "Cloak of Protection"
-                }
+                {"target": "ac", "mod_type": "bonus", "value": 1, "source_name": "Cloak of Protection"},
+                {"target": "saving_throws", "mod_type": "bonus", "value": 1, "source_name": "Cloak of Protection"}
             ]
         }
 
-        # INSERT OR IGNORE ensures we don't overwrite if it already exists
-        cursor.execute("INSERT OR REPLACE INTO items (name, data) VALUES (?, ?)", 
-                       ("Cloak of Protection", json.dumps(cloak_data)))
+        # 3. Insert using the new schema columns
+        cursor.execute("""
+            INSERT OR REPLACE INTO items (name, category, rarity, requires_attunement, data) 
+            VALUES (?, ?, ?, ?, ?)
+        """, ("Cloak of Protection", "Wondrous Item", "Uncommon", True, json.dumps(cloak_data)))
         
         connection.commit()
 
 def fetch_item(item_name):
-    '''
-    Fetch an item definition from the Database.
-    Unique ID: item_name
-    '''
+    """Fetches an item and merges its SQL columns and JSON data into one dictionary."""
     with closing(get_db_connection()) as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT data FROM items WHERE name = ?", (item_name,))
+        # Fetch EVERYTHING (*) instead of just 'data'
+        cursor.execute("SELECT * FROM items WHERE name = ?", (item_name,))
         row = cursor.fetchone()
+        
     if row:
-        return json.loads(row['data'])
+        # Convert the SQLite Row to a standard Python dictionary
+        item_dict = dict(row)
+        
+        # Pop the JSON string out and parse it
+        data_dict = json.loads(item_dict.pop('data'))
+        
+        # Merge the parsed JSON back into the main dictionary
+        item_dict.update(data_dict)
+        
+        # SQLite stores booleans as 1 or 0, so we cast it back to a Python bool
+        item_dict['requires_attunement'] = bool(item_dict['requires_attunement'])
+        
+        return item_dict
     return None
 
 def save_character(character_name, character_data):

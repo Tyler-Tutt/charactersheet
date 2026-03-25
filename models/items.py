@@ -6,6 +6,9 @@ from typing import List
 class InventoryItem:
     """Represents an individual item within a character's inventory"""
     name: str
+    category: str = "Gear"
+    rarity: str = "Common"
+    requires_attunement: bool = False
     description: str = ""
     short_description: str = ""
     is_equipped: bool = False
