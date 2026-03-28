@@ -2,6 +2,9 @@ from enum import Enum
 
 # Multiple Inheritance (Strung Enum: Mixin). Used because of JSON library
 class StatType(str, Enum):
+    '''
+    Stat Value (Abilities, Skills, etc.)
+    '''
     # Abilities
     STRENGTH = "strength"
     DEXTERITY = "dexterity"
@@ -39,6 +42,9 @@ class StatType(str, Enum):
 
 # Multiple Inheritance (String Enum: Mixin)
 class ModifierType(str, Enum):
+    '''
+    How the modifier interacts
+    '''
     BONUS = "bonus"         
     OVERRIDE = "override"   
     MULTIPLIER = "multiplier" 

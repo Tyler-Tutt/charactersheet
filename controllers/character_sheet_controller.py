@@ -24,8 +24,8 @@ class CharacterSheetController:
 
     def toggle_edit_mode(self, e):
         '''
-        Switches the application between read-only and interactive states by updating the is_edit_mode flag. 
-        It dynamically modifies UI elements like icons and tooltips while providing visual feedback to the user via a SnackBar.
+        Switches the application between read-only and editable state by updating the is_edit_mode flag. 
+        Dynamically modifies UI elements like icons and tooltips while providing visual feedback to the user via a SnackBar.
         '''
         self.is_edit_mode = not self.is_edit_mode
 
@@ -39,7 +39,7 @@ class CharacterSheetController:
         self.page.appbar.bgcolor = ft.Colors.AMBER_300 if self.is_edit_mode else None
         self.page.appbar.update()
         
-        mode_text = "Edit Mode Enabled" if self.is_edit_mode else "Viewing Mode"
+        mode_text = "Edit Mode" if self.is_edit_mode else "Viewing Mode"
         self.page.open(ft.SnackBar(ft.Text(mode_text), duration=1500))
 
     def get_view(self):

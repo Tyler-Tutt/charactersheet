@@ -32,6 +32,11 @@ flet run .\main_fley.py
 ## When installing a new library
     pip freeze > requirements.txt
 
+# Resources
+- https://github.com/BTMorton/dnd-5e-srd
+- https://github.com/5e-bits/5e-database
+- https://www.dnd5eapi.co/ 
+
 # TODO 
 - Add a License
 

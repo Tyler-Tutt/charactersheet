@@ -4,15 +4,15 @@ from .enums import StatType, ModifierType
 
 @dataclass
 class EffectModifier:
-    """Standardized class for altering a character's state."""
+    """Class for altering a character's state."""
     source_name: str
     target: StatType
-    mod_type: ModifierType
+    modifier_type: ModifierType
     value: Any
     duration: int = -1
 
     def __post_init__(self):
         if isinstance(self.target, str):
             self.target = StatType(self.target)
-        if isinstance(self.mod_type, str):
-            self.mod_type = ModifierType(self.mod_type)
+        if isinstance(self.modifier_type, str):
+            self.modifier_type = ModifierType(self.modifier_type)

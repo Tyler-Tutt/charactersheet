@@ -78,18 +78,18 @@ def fetch_item(item_name):
         
     if row:
         # Convert the SQLite Row to a standard Python dictionary
-        item_dict = dict(row)
+        item_dictionaried = dict(row)
         
-        # Pop the JSON string out and parse it
-        data_dict = json.loads(item_dict.pop('data'))
+        # Pop the JSON string out from the 'data' field and parse it
+        data_dict = json.loads(item_dictionaried.pop('data'))
         
         # Merge the parsed JSON back into the main dictionary
-        item_dict.update(data_dict)
+        item_dictionaried.update(data_dict)
         
         # SQLite stores booleans as 1 or 0, so we cast it back to a Python bool
-        item_dict['requires_attunement'] = bool(item_dict['requires_attunement'])
+        item_dictionaried['requires_attunement'] = bool(item_dictionaried['requires_attunement'])
         
-        return item_dict
+        return item_dictionaried
     return None
 
 def save_character(character_name, character_data):

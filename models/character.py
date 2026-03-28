@@ -35,7 +35,7 @@ class CharacterModel:
     ability_scores_list: Dict[str, Ability] = field(default_factory=dict)
 
     def __post_init__(self):
-        """Initializes the complex nested ability/skill dictionaries if not provided."""
+        """Initializes the complex nested ability & skill dictionaries if not provided."""
         if not self.ability_scores_list:
             for ability, skills in rules.SKILLS.items():
                 ability_skills = {skill_name: Skill() for skill_name in skills}
@@ -61,7 +61,7 @@ class CharacterModel:
 
     def calculate_stat(self, target_stat: StatType, base_value: int | float) -> int:
         """
-        The Universal Stat Calculation Engine. 
+        Universal Stat Calculation Engine. 
         Order of Operations: Base -> Override -> Bonus -> Multiplier
         """
         # 1. Filter for the specific stat we are calculating
@@ -70,16 +70,16 @@ class CharacterModel:
         final_value = float(base_value)
 
         # 2. Process Overrides (e.g., Setting a stat to a specific number)
-        overrides = [mod.value for mod in relevant_mods if mod.mod_type == ModifierType.OVERRIDE]
+        overrides = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.OVERRIDE]
         if overrides:
             final_value = max(overrides) # Standard D&D rule: take the highest override
 
         # 3. Process Bonuses (Additive/Subtractive)
-        bonuses = [mod.value for mod in relevant_mods if mod.mod_type == ModifierType.BONUS]
+        bonuses = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.BONUS]
         final_value += sum(bonuses)
 
         # 4. Process Multipliers (e.g., double speed)
-        multipliers = [mod.value for mod in relevant_mods if mod.mod_type == ModifierType.MULTIPLIER]
+        multipliers = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.MULTIPLIER]
         for mult in multipliers:
             final_value *= mult
 
