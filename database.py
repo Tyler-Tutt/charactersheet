@@ -6,11 +6,13 @@ DATABASE_FILE = "dnd5e.db"
 
 def get_db_connection():
     """Establishes and returns a connection to the SQLite database. i.e. Creates a database Connection object"""
-    connection = sqlite3.connect(DATABASE_FILE)
+    conn = sqlite3.connect(DATABASE_FILE)
+    conn.row_factory = sqlite3.Row # Allows access to columns by name 
     
-    # Allows access to columns by name
-    connection.row_factory = sqlite3.Row
-    return connection
+    # Modern SQLite optimizations
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
 
 def init_db():
     """
@@ -92,21 +94,17 @@ def fetch_item(item_name):
         return item_dictionaried
     return None
 
-def save_character(character_name, character_data):
-    """
-    Saves a character's data to the database.
-    Inserts a new record or replaces an existing one based on the character name.
-    """
-    with closing(get_db_connection()) as connection:
-        cursor = connection.cursor()
-        # Convert the Python dictionary to a JSON string for storage
-        data_json = json.dumps(character_data)
-        
-        # Use INSERT OR REPLACE to handle both new and existing characters
-        cursor.execute("INSERT OR REPLACE INTO characters (name, data) VALUES (?, ?)",
-                       (character_name, data_json))
-        
-        connection.commit()
+def save_character(character_name: str, character_data: dict):
+    """Saves character data using modern UPSERT syntax."""
+    data_json = json.dumps(character_data)
+    
+    with closing(get_db_connection()) as conn:
+        with conn: # Context manager automatically handles commit/rollback
+            conn.execute("""
+                INSERT INTO characters (name, data) 
+                VALUES (?, ?)
+                ON CONFLICT(name) DO UPDATE SET data = excluded.data;
+            """, (character_name, data_json))
     print(f"Character '{character_name}' saved successfully.")
 
 def fetch_character_list():

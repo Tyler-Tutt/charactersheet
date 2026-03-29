@@ -1,7 +1,7 @@
 from enum import Enum
 
 class PubSubTopic(str, Enum):
-    """Values of Event channels for Flet's Pub/Sub system."""
+    """Values of Event-Channels for Flet's Pub/Sub system."""
     UI_ACTION = "ui_action"
     MODEL_UPDATED = "model_updated"
     EDIT_MODE_CHANGED = "edit_mode_changed"
