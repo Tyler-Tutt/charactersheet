@@ -9,9 +9,7 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE_FILE)
     conn.row_factory = sqlite3.Row # Allows access to columns by name 
     
-    # Modern SQLite optimizations
     conn.execute("PRAGMA journal_mode = WAL;")
-    conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
 def init_db():
@@ -57,8 +55,8 @@ def init_db():
             "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
             "short_description": "+1 AC | +1 to all Saving Throws",
             "modifiers": [
-                {"target": "ac", "mod_type": "bonus", "value": 1, "source_name": "Cloak of Protection"},
-                {"target": "saving_throws", "mod_type": "bonus", "value": 1, "source_name": "Cloak of Protection"}
+                {"target": "ac", "modifier_type": "bonus", "value": 1, "source_name": "Cloak of Protection"},
+                {"target": "saving_throws", "modifier_type": "bonus", "value": 1, "source_name": "Cloak of Protection"}
             ]
         }
 

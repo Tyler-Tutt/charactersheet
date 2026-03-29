@@ -19,6 +19,16 @@ class CharacterSheetController:
         self.model = CharacterModel()
         self.is_edit_mode = False
         
+        # --- Dispatch Dictionary ---
+        # Map the incoming action strings to the specific private methods that handle them.
+        self._action_handlers = {
+            "update_header": self._handle_update_header,
+            "toggle_proficiency": self._handle_toggle_proficiency,
+            "update_ability": self._handle_update_ability,
+            "add_item": self._handle_add_item,
+            "toggle_attunement": self._handle_toggle_attunement
+        }
+        
         self.view = CharacterSheetView(model=self.model)
         self.page.pubsub.subscribe_topic(PubSubTopic.UI_ACTION, self.handle_subscribe_topic_ui_action)
 
@@ -48,63 +58,75 @@ class CharacterSheetController:
         '''
         return self.view
 
-    # --- The Central Action Hub ---
+    # --- Central Routing Engine ---
     def handle_subscribe_topic_ui_action(self, topic: str, message: dict):
-        """Listens for actions broadcasted by UI components, updates model, and triggers a UI refresh."""
+        """Listens for actions broadcasted by UI components, routes them, and triggers a UI refresh."""
         action = message.get("action")
-
-        if action == "update_header":
-            attr_name = message["attr"]
-            new_value = message["value"]
-            old_value = getattr(self.model, attr_name, None)
+        
+        # Look up the correct method in the dictionary based on the action string
+        handler_method = self._action_handlers.get(action)
+        
+        if handler_method:
+            # If the method exists, execute it and pass the message payload
+            handler_method(message)
             
-            if attr_name in ['level', 'experience_points', 'speed', 'max_hp', 'current_hp', 'temp_hp']:
-                try:
-                    new_value = int(new_value)
-                except (ValueError, TypeError):
-                    new_value = old_value 
-            
-            if attr_name == 'speed':
-                self.model.base_speed = new_value
-            else:
-                setattr(self.model, attr_name, new_value)
+            # After a successful update, tell the entire app that the model has changed!
+            self.page.pubsub.send_all_on_topic(PubSubTopic.MODEL_UPDATED, "update")
+        else:
+            # Gracefully handle typos or unimplemented actions
+            print(f"Warning: Unrecognized UI action '{action}'")
 
-        elif action == "toggle_proficiency":
-            ability_name = message["ability"]
-            skill_name = message["skill"]
-            self.model.ability_scores_list[ability_name].skills[skill_name].base_proficiency = message["is_proficient"]
+    # --- 3. The Isolated Action Handlers ---
+    
+    def _handle_update_header(self, message: dict):
+        attr_name = message["attr"]
+        new_value = message["value"]
+        old_value = getattr(self.model, attr_name, None)
+        
+        if attr_name in ['level', 'experience_points', 'speed', 'max_hp', 'current_hp', 'temp_hp']:
+            try:
+                new_value = int(new_value)
+            except (ValueError, TypeError):
+                new_value = old_value 
+        
+        if attr_name == 'speed':
+            self.model.base_speed = new_value
+        else:
+            setattr(self.model, attr_name, new_value)
 
-        elif action == "update_ability":
-            ability_name = message["ability"]
-            if ability_name in self.model.ability_scores_list:
-                self.model.ability_scores_list[ability_name].base_score = message["score"]
+    def _handle_toggle_proficiency(self, message: dict):
+        ability_name = message["ability"]
+        skill_name = message["skill"]
+        self.model.ability_scores_list[ability_name].skills[skill_name].base_proficiency = message["is_proficient"]
 
-        elif action == "add_item":
-            item_name = message["item_name"]
-            item_data = database.fetch_item(item_name)
-            
-            if item_data:
-                new_item = InventoryItem(
-                    name=item_data.get("name", item_name),
-                    category=item_data.get("category", "Gear"),
-                    rarity=item_data.get("rarity", "Common"),
-                    requires_attunement=item_data.get("requires_attunement", False),
-                    description=item_data.get("description", ""),
-                    short_description=item_data.get("short_description", ""), 
-                    modifiers=item_data.get("modifiers", [])
-                )
-                self.model.inventory.append(new_item)
-                self.page.open(ft.SnackBar(ft.Text(f"Added {item_name} to inventory!")))
-            else:
-                self.page.open(ft.SnackBar(ft.Text(f"Item {item_name} not found in database."), bgcolor=ft.Colors.ERROR))
+    def _handle_update_ability(self, message: dict):
+        ability_name = message["ability"]
+        if ability_name in self.model.ability_scores_list:
+            self.model.ability_scores_list[ability_name].base_score = message["score"]
 
-        elif action == "toggle_attunement":
-            item_index = message["index"]
-            self.model.inventory[item_index].is_equipped = message["is_equipped"]
-            self.model.update_active_modifiers()
+    def _handle_add_item(self, message: dict):
+        item_name = message["item_name"]
+        item_data = database.fetch_item(item_name)
+        
+        if item_data:
+            new_item = InventoryItem(
+                name=item_data.get("name", item_name),
+                category=item_data.get("category", "Gear"),
+                rarity=item_data.get("rarity", "Common"),
+                requires_attunement=item_data.get("requires_attunement", False),
+                description=item_data.get("description", ""),
+                short_description=item_data.get("short_description", ""), 
+                modifiers=item_data.get("modifiers", [])
+            )
+            self.model.inventory.append(new_item)
+            self.page.open(ft.SnackBar(ft.Text(f"Added {item_name} to inventory!")))
+        else:
+            self.page.open(ft.SnackBar(ft.Text(f"Item {item_name} not found in database."), bgcolor=ft.Colors.ERROR))
 
-        # Tell the entire app that the model has changed!
-        self.page.pubsub.send_all_on_topic(PubSubTopic.MODEL_UPDATED, "update")
+    def _handle_toggle_attunement(self, message: dict):
+        item_index = message["index"]
+        self.model.inventory[item_index].is_equipped = message["is_equipped"]
+        self.model.update_active_modifiers()
 
     # --- External Save/Load ---
     def save_character(self, e):
