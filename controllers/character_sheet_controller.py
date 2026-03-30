@@ -3,7 +3,7 @@ from models import CharacterModel, InventoryItem
 from views.character_sheet_view import CharacterSheetView
 from views.load_character_modal import LoadCharacterModal
 import database
-from events import PubSubTopic
+from events import PubSubTopic, UIAction
 
 class CharacterSheetController:
     '''
@@ -20,17 +20,23 @@ class CharacterSheetController:
         self.is_edit_mode = False
         
         # --- Dispatch Dictionary ---
-        # Map the incoming action strings to the specific private methods that handle them.
+        # Map the incoming action strings to the private-methods that handle them.
         self._action_handlers = {
-            "update_header": self._handle_update_header,
-            "toggle_proficiency": self._handle_toggle_proficiency,
-            "update_ability": self._handle_update_ability,
-            "add_item": self._handle_add_item,
-            "toggle_attunement": self._handle_toggle_attunement
+            UIAction.UPDATE_HEADER: self._handle_update_header,
+            UIAction.TOGGLE_PROFICIENCY: self._handle_toggle_proficiency,
+            UIAction.UPDATE_ABILITY: self._handle_update_ability,
+            UIAction.ADD_ITEM: self._handle_add_item,
+            UIAction.TOGGLE_ATTUNEMENT: self._handle_toggle_attunement
         }
         
         self.view = CharacterSheetView(model=self.model)
-        self.page.pubsub.subscribe_topic(PubSubTopic.UI_ACTION, self.handle_subscribe_topic_ui_action)
+
+        # Whenever a message comes across the UI_ACTION "frequency", 
+        # trigger the 'handle_subscribe_topic_ui_action' function
+        self.page.pubsub.subscribe_topic(
+            PubSubTopic.UI_ACTION, 
+            self.handle_subscribe_topic_ui_action
+        )
 
     def toggle_edit_mode(self, e):
         '''
@@ -58,19 +64,22 @@ class CharacterSheetController:
         '''
         return self.view
 
-    # --- Central Routing Engine ---
+    # --- Central Routing Engine (Radio Tower) ---
     def handle_subscribe_topic_ui_action(self, topic: str, message: dict):
         """Listens for actions broadcasted by UI components, routes them, and triggers a UI refresh."""
-        action = message.get("action")
+        # Flet passes two things:
+        # topic = "ui_action" 
+        # message = {"action": UIAction.UPDATE_HEADER, "attr": "charactername", "value": "Thorin"}
+        action = message.get("action") # extracts UIAction.UPDATE_HEADER
         
-        # Look up the correct method in the dictionary based on the action string
+        # Looks up the matching method in the Dispatch Dictionary based on string returned in action
         handler_method = self._action_handlers.get(action)
         
         if handler_method:
             # If the method exists, execute it and pass the message payload
-            handler_method(message)
+            handler_method(message) # Forwards the payload to _handle_update_header
             
-            # After a successful update, tell the entire app that the model has changed!
+            # After a successful update, tell the entire app that the model has changed
             self.page.pubsub.send_all_on_topic(PubSubTopic.MODEL_UPDATED, "update")
         else:
             # Gracefully handle typos or unimplemented actions

@@ -1,6 +1,6 @@
 import flet as ft
 from models import CharacterModel
-from events import PubSubTopic
+from events import PubSubTopic, UIAction
 
 class CharacterHeaderContainer(ft.Container):
     def __init__(self, model: CharacterModel):
@@ -46,8 +46,12 @@ class CharacterHeaderContainer(ft.Container):
 
     # --- Action Publishers ---
     def _on_header_change(self, e):
+        '''
+        Action to take on changing a header field's value
+        Tell's the Flet PubSub 'Frequency' of 'UI_ACTION' to trigger
+        '''
         e.page.pubsub.send_all_on_topic(PubSubTopic.UI_ACTION, {
-            "action": "update_header",
+            "action": UIAction.UPDATE_HEADER ,
             "attr": e.control.data,
             "value": e.control.value
         })

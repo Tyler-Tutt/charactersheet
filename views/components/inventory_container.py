@@ -1,6 +1,6 @@
 import flet as ft
 from models import CharacterModel
-from events import PubSubTopic
+from events import PubSubTopic, UIAction
 
 class InventoryContainer(ft.Container):
     def __init__(self, model: CharacterModel):
@@ -46,7 +46,7 @@ class InventoryContainer(ft.Container):
 
     def _on_attunement_change(self, e):
         e.page.pubsub.send_all_on_topic(PubSubTopic.UI_ACTION, {
-            "action": "toggle_attunement",
+            "action": UIAction.TOGGLE_ATTUNEMENT,
             "index": e.control.data,
             "is_equipped": e.control.value
         })
