@@ -3,13 +3,12 @@ from typing import Dict, List
 import rules_5e as rules
 from .items import InventoryItem
 from .stats import Ability, Skill
-from .enums import StatType, ModifierType
+from .enums import StatType, ArithmeticType
 from .effectmodifiers import EffectModifier
 
 @dataclass
 class CharacterModel:
-    """Represents the current data and score-logic of a Character"""
-    
+    """ "The Model": Represents current data and score-logic of a Character"""
     # --- Core Attributes ---
     charactername: str = "Character Name"
     characterclass: str = "Character Class"
@@ -35,7 +34,7 @@ class CharacterModel:
     ability_scores_list: Dict[str, Ability] = field(default_factory=dict)
 
     def __post_init__(self):
-        """Initializes the complex nested ability & skill dictionaries if not provided."""
+        """Initializes the nested Ability & Skill dictionaries if not provided."""
         if not self.ability_scores_list:
             for ability, skills in rules.SKILLS.items():
                 ability_skills = {skill_name: Skill() for skill_name in skills}
@@ -49,7 +48,7 @@ class CharacterModel:
         """Rebuilds the active modifiers list based on equipped items, active spells, etc."""
         self.active_modifiers.clear()
         
-        # Pull from Inventory
+        # Pulls modifiers from Inventory Items
         self.active_modifiers.extend([
             mod for item in self.inventory 
             if item.is_equipped for mod in item.modifiers
@@ -64,22 +63,18 @@ class CharacterModel:
         Universal Stat Calculation Engine. 
         Order of Operations: Base -> Override -> Bonus -> Multiplier
         """
-        # 1. Filter for the specific stat we are calculating
+        # 1. Filter for the target_stat
         relevant_mods = [mod for mod in self.active_modifiers if mod.target == target_stat]
-        
         final_value = float(base_value)
-
         # 2. Process Overrides (e.g., Setting a stat to a specific number)
-        overrides = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.OVERRIDE]
+        overrides = [mod.value for mod in relevant_mods if mod.arithmetic_type == ArithmeticType.OVERRIDE]
         if overrides:
             final_value = max(overrides) # Standard D&D rule: take the highest override
-
         # 3. Process Bonuses (Additive/Subtractive)
-        bonuses = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.BONUS]
+        bonuses = [mod.value for mod in relevant_mods if mod.arithmetic_type == ArithmeticType.BONUS]
         final_value += sum(bonuses)
-
         # 4. Process Multipliers (e.g., double speed)
-        multipliers = [mod.value for mod in relevant_mods if mod.modifier_type == ModifierType.MULTIPLIER]
+        multipliers = [mod.value for mod in relevant_mods if mod.arithmetic_type == ArithmeticType.MULTIPLIER]
         for mult in multipliers:
             final_value *= mult
 

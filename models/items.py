@@ -16,6 +16,6 @@ class InventoryItem:
 
     def __post_init__(self):
         """Converts raw dictionaries from the DB into Modifier objects."""
-        # When loaded from JSON, modifiers might be dictionaries convert them
+        # When loaded from JSON, modifiers might be dictionaries convert them to an EffectModifier
         if self.modifiers and isinstance(self.modifiers[0], dict):
             self.modifiers = [EffectModifier(**mod_dict) for mod_dict in self.modifiers]

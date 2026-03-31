@@ -12,7 +12,7 @@ DEFAULT_MAX_HP: Final[int] = 10
 PROFICIENCY_BASE: Final[int] = 2
 PROFICIENCY_LEVEL_DIVISOR: Final[int] = 4
 
-# --- Character Abilities & Skills (NOW FULLY TYPE-SAFE) ---
+# --- Character Abilities & Skills ---
 ABILITIES: Final[List[StatType]] = [
     StatType.STRENGTH, StatType.DEXTERITY, StatType.CONSTITUTION,
     StatType.INTELLIGENCE, StatType.WISDOM, StatType.CHARISMA

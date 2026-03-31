@@ -2,7 +2,7 @@ from .character import CharacterModel
 from .items import InventoryItem
 from .stats import Ability, Skill
 from .effectmodifiers import EffectModifier
-from .enums import StatType, ModifierType
+from .enums import StatType, ArithmeticType
 
 __all__ = [
     "CharacterModel",
@@ -11,5 +11,5 @@ __all__ = [
     "Skill",
     "EffectModifier",
     "StatType",
-    "ModifierType"
+    "ArithmeticType"
 ]

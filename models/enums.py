@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
-# Multiple Inheritance (Strung Enum: Mixin). Used because of JSON library
-class StatType(str, Enum):
+# Multiple Inheritance (String Enum: Mixin). Used because of JSON library
+class StatType(StrEnum):
     '''
-    Stat Value (Abilities, Skills, etc.)
+    Allowed Values for a specific Stat (Strength, AC, Stealth, etc.)
     '''
     # Abilities
     STRENGTH = "strength"
@@ -41,9 +41,9 @@ class StatType(str, Enum):
     PERSUASION = "persuasion"
 
 # Multiple Inheritance (String Enum: Mixin)
-class ModifierType(str, Enum):
+class ArithmeticType(StrEnum):
     '''
-    How the modifier interacts
+    How the value of the EffectModifier is intended to interact
     '''
     BONUS = "bonus"         
     OVERRIDE = "override"   

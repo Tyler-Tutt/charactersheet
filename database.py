@@ -50,6 +50,8 @@ def init_db():
             )
         ''')
 
+        #TODO Find a way to easily manipulate data (Items, Spells, feats, etc.) in a spreadsheet, 
+        #TODO but quickly export/generate JSON so that it can be put into the 1-time-db-initialization-script
         # 2. Extract the static metadata out of the JSON blob
         cloak_data = {
             "description": "You gain a +1 bonus to AC and saving throws while you wear this cloak.",
@@ -79,16 +81,12 @@ def fetch_item(item_name):
     if row:
         # Convert the SQLite Row to a standard Python dictionary
         item_dictionaried = dict(row)
-        
         # Pop the JSON string out from the 'data' field and parse it
         data_dict = json.loads(item_dictionaried.pop('data'))
-        
         # Merge the parsed JSON back into the main dictionary
         item_dictionaried.update(data_dict)
-        
         # SQLite stores booleans as 1 or 0, so we cast it back to a Python bool
         item_dictionaried['requires_attunement'] = bool(item_dictionaried['requires_attunement'])
-        
         return item_dictionaried
     return None
 
