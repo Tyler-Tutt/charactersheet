@@ -12,7 +12,7 @@ class CharacterSheetController:
     '''
     def __init__(self, page: ft.Page):
         '''
-        Initializes the controller by linking the Flet page, instantiating the data model, and creating the main character sheet view. 
+        Initializes the Controller by linking the Flet page, instantiating the data model, and creating the main character sheet view. 
         Also sets the initial application state, starting the user in a non-editable viewing mode.
         '''
         self.page = page
@@ -50,7 +50,7 @@ class CharacterSheetController:
         
         e.control.icon = ft.Icons.EDIT if self.is_edit_mode else ft.Icons.EDIT_OFF
         e.control.tooltip = "Switch to View Mode" if self.is_edit_mode else "Switch to Edit Mode"
-        e.control.update() 
+        e.control.update()
 
         self.page.appbar.bgcolor = ft.Colors.AMBER_300 if self.is_edit_mode else None
         self.page.appbar.update()

@@ -43,7 +43,7 @@ class StatType(StrEnum):
 # Multiple Inheritance (String Enum: Mixin)
 class ArithmeticType(StrEnum):
     '''
-    How the value of the EffectModifier is intended to interact
+    How the 'value' of the EffectModifier is intended to interact with a character's stats
     '''
     BONUS = "bonus"         
     OVERRIDE = "override"   

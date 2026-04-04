@@ -142,6 +142,7 @@ def fetch_races():
         
     return races
 
+#TODO Dead Code?
 class UserPreferences:
     """
     Creates a User Record
