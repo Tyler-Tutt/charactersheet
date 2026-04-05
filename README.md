@@ -43,3 +43,4 @@ flet run .\main_fley.py
 ## Feature List
 - Scrolling Text Area that records the last actions (took 5 damage, used spell, etc.)
 - Health and Mana (Spell Slot) Bars connected to HP-Text
+- Dice Roller with breakdown of what dice were rolled and why (not abstracted away)
